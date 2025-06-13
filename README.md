@@ -1,6 +1,12 @@
-# iajs
+# iats
 
 **Internet Archive JavaScript Client which supports reading and writing data in NodeJS and the Browser**
+
+This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs) with the following changes:
+- Added TypeScript support
+  - Still pending: appropriate return types
+- Dropped `node-fetch` and `fetch-jsonp` dependencies (now uses global `fetch`)
+- Dropped `prettier` for `@biomejs/biome`
 
 The Internet Archive is a non-profit open platform for archiving the world's free websites, books, movies, software, music, and more.
 
@@ -16,10 +22,11 @@ This library contains enough functionality to create powerful experiments and ne
 
 Through npm
 ```
-npm i iajs
+npm i git+https://github.com/shayypy/iats.git
 ```
 
-Load from CDN in browser
+~~Load from CDN in browser~~
+This package is not currently published on NPM! The outdated browser examples below will load the iajs package from which this is forked.
 ```
 <script src="https://unpkg.com/iajs/dist/ia.browser.js"></script>
 ```

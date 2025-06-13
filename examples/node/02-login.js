@@ -11,9 +11,9 @@ const log = console.log;
   log(auth);
 
   console.log("Demo creating an auth object from cookies:");
-  let authFromCookies = await Auth.fromCookies(
+  const authFromCookies = await Auth.fromCookies(
     auth.values.cookies["logged-in-sig"].split(";")[0],
-    auth.values.cookies["logged-in-user"].split(";")[0]
+    auth.values.cookies["logged-in-user"].split(";")[0],
   );
   log(authFromCookies);
 })();

@@ -7,7 +7,7 @@ const log = console.log;
   log(
     await ZipFileAPI.ls(
       "goodytwoshoes00newyiala",
-      "goodytwoshoes00newyiala_jp2.zip"
-    )
+      "goodytwoshoes00newyiala_jp2.zip",
+    ),
   );
 })();

@@ -1,12 +1,13 @@
-import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
 import babel, { getBabelOutputPlugin } from "@rollup/plugin-babel";
+import commonjs from "@rollup/plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import typescript from "@rollup/plugin-typescript";
 import pkg from "./package.json";
 
 function browser(name) {
   return {
-    input: "src/main.js",
-    external: ["node-fetch", "xmldom"],
+    input: "src/index.ts",
+    external: ["xmldom"],
     output: [
       {
         name: "ia",
@@ -21,6 +22,7 @@ function browser(name) {
       },
     ],
     plugins: [
+      typescript(),
       resolve(),
       commonjs(),
       babel({
@@ -33,8 +35,8 @@ function browser(name) {
 
 function modern(name) {
   return {
-    input: "src/main.js",
-    external: ["node-fetch", "xmldom"],
+    input: "src/index.ts",
+    external: ["xmldom"],
     output: [
       {
         name: "ia",
@@ -59,7 +61,7 @@ function modern(name) {
         ],
       },
     ],
-    plugins: [resolve(), commonjs()],
+    plugins: [typescript(), resolve(), commonjs()],
   };
 }
 
@@ -68,12 +70,12 @@ export default [
   browser("examples/web/ia.browser.js"),
   modern("dist/ia.modern.js"),
   {
-    input: "src/main.js",
+    input: "src/index.ts",
     external: [],
     output: [
-      { file: pkg.main, format: "cjs" },
+      { file: pkg.cjs, format: "cjs" },
       { file: pkg.module, format: "es" },
     ],
-    plugins: [commonjs()],
+    plugins: [typescript(), commonjs()],
   },
 ];

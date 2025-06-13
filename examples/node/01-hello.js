@@ -9,7 +9,7 @@ const log = console.log;
   log(await MetadataAPI.get({ identifier, path: "metadata" }));
   log(await MetadataAPI.get({ identifier, path: "metadata/identifier" }));
   log(await RelatedAPI.get({ identifier }));
-  let searchResults = await SearchAPI.get({
+  const searchResults = await SearchAPI.get({
     q: searchTerm,
     fields: ["identifier"],
     page: 2,
@@ -17,7 +17,7 @@ const log = console.log;
   log(
     searchResults["response"]["docs"]
       .map((r) => `https://archive.org/details/${r["identifier"]}`)
-      .join("\n")
+      .join("\n"),
   );
   log((await GifcitiesAPI.search(searchTerm)).slice(0, 10));
 })();

@@ -3,3 +3,4 @@ node_modules
 dist
 # examples/web/ia.browser.js
 test-config.json
+.DS_Store

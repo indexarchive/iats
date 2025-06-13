@@ -7,7 +7,7 @@ const log = console.log;
 const enc = encodeURIComponent;
 
 (async () => {
-  let auth = await getTestAuth();
+  const auth = await getTestAuth();
 
   // Modify the title (note you should change this to an item you own)
   const identifier = "iajs-example-reviews";

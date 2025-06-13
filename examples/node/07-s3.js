@@ -3,7 +3,7 @@ const { getTestAuth, yesno, promptStr } = require("./common");
 const log = console.log;
 
 (async () => {
-  let auth = await getTestAuth();
+  const auth = await getTestAuth();
 
   // You can change this identifier to a new unclaimed item
   const identifier = "iajs-example-s3";
@@ -15,7 +15,7 @@ const log = console.log;
       question: `Would you like to upload to item: ${identifier} (y/n)?`,
     })
   ) {
-    let key = await promptStr("filename: ");
+    const key = await promptStr("filename: ");
     const body = `The date is ${new Date().toISOString()}`;
     const metadata = { title: "s3 PUT test item" };
     log(
@@ -26,7 +26,7 @@ const log = console.log;
         metadata,
         autocreate: true,
         auth,
-      })
+      }),
     );
   }
 
@@ -47,7 +47,7 @@ const log = console.log;
         testItem: true,
         auth,
         wait: false,
-      })
+      }),
     );
     log(`https://archive.org/details/${newIdentifier}`);
     log(`https://s3.us.archive.org/${newIdentifier}`);

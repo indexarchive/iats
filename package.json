@@ -1,8 +1,9 @@
 {
-  "name": "iajs",
+  "name": "iats",
   "version": "0.2.0",
-  "description": "Internet Archive JavaScript Client",
-  "main": "dist/ia.cjs.js",
+  "description": "Internet Archive TypeScript Client",
+  "main": "src/index.ts",
+  "cjs": "dist/ia.cjs.js",
   "module": "dist/ia.esm.js",
   "browser": "dist/ia.browser.js",
   "scripts": {
@@ -14,35 +15,31 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rchrd2/iajs.git"
+    "url": "git+https://github.com/shayypy/iats.git"
   },
-  "keywords": [
-    "Internet",
-    "Archive",
-    "Client"
-  ],
-  "author": "Richard Caceres",
+  "keywords": ["Internet", "Archive", "Client"],
+  "author": ["Richard Caceres", "shay (shayypy)"],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rchrd2/iajs/issues"
+    "url": "https://github.com/shayypy/iats/issues"
   },
-  "homepage": "https://github.com/rchrd2/iajs#readme",
+  "homepage": "https://github.com/shayypy/iats#readme",
   "dependencies": {
-    "fetch-jsonp": "^1.1.3",
-    "node-fetch": "^2.6.1",
     "xmldom": "^0.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
+    "@biomejs/biome": "^1.9.4",
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-commonjs": "^11.0.1",
     "@rollup/plugin-node-resolve": "^7.0.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/xmldom": "^0.1.34",
     "babel-plugin-async-to-promises": "^1.0.5",
-    "prettier": "2.1.2",
-    "rollup": "^1.29.0"
+    "rollup": "^1.29.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

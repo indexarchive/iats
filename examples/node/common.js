@@ -41,7 +41,7 @@ async function getTestAuth() {
   console.log(`Reading: ${testConfigPath}`);
 
   if (fs.existsSync(testConfigPath)) {
-    let fileAuth = require(testConfigPath);
+    const fileAuth = require(testConfigPath);
     if (fileAuth.success) {
       return fileAuth;
     }
@@ -49,9 +49,9 @@ async function getTestAuth() {
 
   console.log("Test config not found.");
   console.log("Log in with a test account to create one");
-  let email = await promptStr("email: ");
-  let password = await promptPw("password (will not be saved): ");
-  let auth = await Auth.login(email, password);
+  const email = await promptStr("email: ");
+  const password = await promptPw("password (will not be saved): ");
+  const auth = await Auth.login(email, password);
   fs.writeFileSync(testConfigPath, JSON.stringify(auth, null, 2));
   console.log(`Wrote config to ${testConfigPath}`);
   return auth;
@@ -86,8 +86,8 @@ async function yesno({ question, defaultValue, yesValues, noValues, invalid }) {
     output: process.stdout,
   });
 
-  return new Promise(function (resolve, reject) {
-    rl.question(question + " ", async function (answer) {
+  return new Promise((resolve, reject) => {
+    rl.question(question + " ", async (answer) => {
       rl.close();
       const cleaned = answer.trim().toLowerCase();
       if (cleaned == "" && defaultValue != null) return resolve(defaultValue);

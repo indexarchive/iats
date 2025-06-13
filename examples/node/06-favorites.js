@@ -5,7 +5,7 @@ const log = console.log;
 (async () => {
   log(await FavoritesAPI.get({ screenname: "r2_t5" }));
 
-  let auth = await getTestAuth();
+  const auth = await getTestAuth();
   log(await FavoritesAPI.get({ auth }));
 
   const identifier = "iajs-example-reviews";

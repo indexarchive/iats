@@ -1,36 +1,44 @@
 import { DOMParser } from "xmldom";
+import type { AuthData } from "./auth";
 
-let CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
+const CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
 
 const enc = encodeURIComponent;
-const paramify = (obj) => new URLSearchParams(obj).toString();
-const str2arr = (v) => (Array.isArray(v) ? v : [v]);
+const paramify = (obj: Record<string, string>) =>
+  new URLSearchParams(obj).toString();
+const str2arr = (v: string | string[]) => (Array.isArray(v) ? v : [v]);
 
 const isInBrowser = () => {
   return !(typeof window === "undefined");
 };
 
-const corsWorkAround = (url) => {
+const corsWorkAround = (url: string) => {
   if (isInBrowser()) {
     return `${CORS_PROXY}/${url}`;
-  } else {
-    return url;
   }
+  return url;
 };
 
-const fetchJson = async function (url, options) {
-  const res = await fetch(url, options);
+const fetchJson = async (url: string, options?: RequestInit) => {
+  const res = await fetch(
+    url,
+    options ? { method: "GET", ...options } : { method: "GET" },
+  );
   return await res.json();
 };
 
-const authToHeaderS3 = function (auth) {
-  return auth.values.s3.access && auth.values.s3.secret
-    ? {
-        Authorization: `LOW ${auth.values.s3.access}:${auth.values.s3.secret}`,
-      }
-    : {};
+const authToHeaderS3 = (auth: AuthData): Headers => {
+  const headers = new Headers();
+  if (auth.values.s3.access && auth.values.s3.secret) {
+    headers.set(
+      "Authorization",
+      `LOW ${auth.values.s3.access}:${auth.values.s3.secret}`,
+    );
+  }
+  return headers;
 };
-const authToHeaderCookies = function (auth) {
+
+const authToHeaderCookies = (auth: AuthData) => {
   if (
     auth.values.cookies["logged-in-sig"] &&
     auth.values.cookies["logged-in-user"]
@@ -42,13 +50,12 @@ const authToHeaderCookies = function (auth) {
       headers["X-Cookie-Cors"] = cookieStr;
     }
     return headers;
-  } else {
-    return {};
   }
+  return {};
 };
 
-const newEmptyAuth = function () {
-  return JSON.parse(
+const newEmptyAuth = (): AuthData =>
+  JSON.parse(
     JSON.stringify({
       success: false,
       values: {
@@ -59,19 +66,17 @@ const newEmptyAuth = function () {
         screenname: null,
       },
       version: 1,
-    })
+    }),
   );
-};
 
 class Auth {
-  constructor() {
-    this.XAUTH_BASE = corsWorkAround("https://archive.org/services/xauthn/");
-  }
-  async login(email, password) {
+  XAUTH_BASE = corsWorkAround("https://archive.org/services/xauthn/");
+
+  async login(email: string, password: string) {
     try {
       const fetchOptions = {
         method: "POST",
-        body: `email=${enc(email)}&password=${enc(password)}`,
+        body: new URLSearchParams({ email, password }),
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -87,7 +92,12 @@ class Auth {
       return newEmptyAuth();
     }
   }
-  async fromS3(access, secret, newAuth = newEmptyAuth()) {
+
+  async fromS3(
+    access: string,
+    secret: string,
+    newAuth: AuthData = newEmptyAuth(),
+  ) {
     newAuth.success = 1;
     newAuth.values.s3.access = access;
     newAuth.values.s3.secret = secret;
@@ -101,14 +111,19 @@ class Auth {
     // It is still TBD if those are needed
     return newAuth;
   }
-  async fromCookies(loggedInSig, loggedInUser, newAuth = newEmptyAuth()) {
+
+  async fromCookies(
+    loggedInSig: string,
+    loggedInUser: string,
+    newAuth: AuthData = newEmptyAuth(),
+  ) {
     newAuth.values.cookies["logged-in-sig"] = loggedInSig;
     newAuth.values.cookies["logged-in-user"] = loggedInUser;
     const s3response = await fetch(
       corsWorkAround("https://archive.org/account/s3.php?output_json=1"),
       {
         headers: authToHeaderCookies(newAuth),
-      }
+      },
     );
     const s3 = await s3response.json();
     if (!s3.success) {
@@ -121,33 +136,54 @@ class Auth {
 class BookReaderAPI {}
 
 class FavoritesAPI {
-  constructor() {
-    this.API_BASE = corsWorkAround("https://archive.org/bookmarks.php");
-    // TODO support this non-json explore endpoint
-    this.EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
-  }
-  async get({ screenname = null, auth = newEmptyAuth() }) {
+  API_BASE = corsWorkAround("https://archive.org/bookmarks.php");
+  EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
+
+  async get({
+    screenname = null,
+    auth = newEmptyAuth(),
+  }: {
+    screenname?: string | null;
+    auth?: AuthData;
+  }) {
     if (!screenname && auth.values.screenname) {
       screenname = auth.values.screenname;
     }
     if (screenname) {
-      let params = { output: "json", screenname };
+      const params = { output: "json", screenname };
       return await fetchJson(`${this.API_BASE}?${paramify(params)}`);
-    } else {
-      throw new Error(
-        "Neither screenname or auth provided for bookmarks lookup"
-      );
     }
+    throw new Error("Neither screenname or auth provided for bookmarks lookup");
   }
-  async add({ identifier = null, comments = "", auth = newEmptyAuth() } = {}) {
+
+  async add({
+    identifier,
+    auth = newEmptyAuth(),
+  }: {
+    identifier: string;
+    auth?: AuthData;
+  }) {
     return await this.modify({ identifier, add_bookmark: 1 }, auth);
   }
-  async remove({ identifier = null, auth = null } = {}) {
+
+  async remove({
+    identifier,
+    auth = newEmptyAuth(),
+  }: {
+    identifier: string;
+    auth?: AuthData;
+  }) {
     return await this.modify({ identifier, del_bookmark: identifier }, auth);
   }
-  async modify(params, auth) {
+
+  async modify(
+    params: {
+      identifier: string;
+    } & Record<string, unknown>,
+    auth: AuthData,
+  ) {
     try {
-      let mdResponse = await iajs.MetadataAPI.get({
+      const mdResponse = await iajs.MetadataAPI.get({
         identifier: params.identifier,
         path: "/metadata",
       });
@@ -156,8 +192,11 @@ class FavoritesAPI {
     } catch (e) {
       throw new Error(`Metadata lookup failed for: ${params.identifier}`);
     }
-    params.output = "json";
-    const response = await fetch(`${this.API_BASE}?${paramify(params)}`, {
+    const sparams = new URLSearchParams({
+      ...params,
+      output: "json",
+    });
+    const response = await fetch(`${this.API_BASE}?${sparams}`, {
       method: "POST",
       headers: authToHeaderCookies(auth),
     });
@@ -168,45 +207,59 @@ class FavoritesAPI {
 }
 
 class GifcitiesAPI {
-  constructor() {
-    this.API_BASE = "https://gifcities.archive.org/api/v1/gifsearch";
+  API_BASE = "https://gifcities.archive.org/api/v1/gifsearch";
+
+  async get({ q }: { q?: string | null } = {}) {
+    if (q == null) return [];
+    return fetchJson(`${this.API_BASE}?${new URLSearchParams({ q })}`);
   }
-  async get({ q = null } = {}) {
-    if (q === null) return [];
-    return fetchJson(`${this.API_BASE}?q=${enc(q)}`);
-  }
-  async search(q) {
+
+  async search(q: string) {
     return this.get({ q });
   }
 }
 
 class MetadataAPI {
-  constructor() {
-    this.READ_API_BASE = "https://archive.org/metadata";
-    this.WRITE_API_BASE = corsWorkAround("https://archive.org/metadata");
+  READ_API_BASE = "https://archive.org/metadata";
+  WRITE_API_BASE = corsWorkAround("https://archive.org/metadata");
+
+  async get({
+    identifier,
+    path = "",
+    auth = newEmptyAuth(),
+  }: {
+    identifier: string;
+    path?: string;
+    auth?: AuthData;
+  }) {
+    return fetchJson(`${this.READ_API_BASE}/${identifier}/${path}`, {
+      headers: authToHeaderS3(auth),
+    });
   }
-  async get({ identifier = null, path = "", auth = newEmptyAuth() } = {}) {
-    const options = {};
-    options.headers = authToHeaderS3(auth);
-    return fetchJson(`${this.READ_API_BASE}/${identifier}/${path}`, options);
-  }
+
   async patch({
-    identifier = null,
+    identifier,
     target = "metadata",
     priority = -5,
     patch = {},
     auth = newEmptyAuth(),
-  } = {}) {
+  }: {
+    identifier: string;
+    target?: string;
+    priority?: number;
+    patch?: unknown;
+    auth?: AuthData;
+  }) {
     // https://archive.org/services/docs/api/metadata.html#targets
-    const reqParams = {
+    const body = new URLSearchParams({
       "-target": target,
       "-patch": JSON.stringify(patch),
-      priority,
-      secret: auth.values.s3.secret,
-      access: auth.values.s3.access,
-    };
+      priority: String(priority),
+    });
+    if (auth.values.s3.secret) body.set("secret", auth.values.s3.secret);
+    if (auth.values.s3.access) body.set("access", auth.values.s3.access);
+
     const url = `${this.WRITE_API_BASE}/${identifier}`;
-    const body = paramify(reqParams);
     const response = await fetch(url, {
       method: "POST",
       body,
@@ -219,21 +272,19 @@ class MetadataAPI {
 }
 
 class RelatedAPI {
-  constructor() {
-    this.API_BASE = "https://be-api.us.archive.org/mds/v1";
-  }
+  API_BASE = "https://be-api.us.archive.org/mds/v1";
+
   async get({ identifier = null } = {}) {
     return fetchJson(`${this.API_BASE}/get_related/all/${identifier}`);
   }
 }
 
 class ReviewsAPI {
-  constructor() {
-    this.WRITE_API_BASE = corsWorkAround(
-      "https://archive.org/services/reviews.php?identifier="
-    );
-    this.READ_API_BASE = "https://archive.org/metadata";
-  }
+  WRITE_API_BASE = corsWorkAround(
+    "https://archive.org/services/reviews.php?identifier=",
+  );
+  READ_API_BASE = "https://archive.org/metadata";
+
   async get({ identifier = null } = {}) {
     return fetchJson(`${this.READ_API_BASE}/${identifier}/reviews`);
   }
@@ -258,9 +309,8 @@ class ReviewsAPI {
 }
 
 class S3API {
-  constructor() {
-    this.API_BASE = "https://s3.us.archive.org";
-  }
+  API_BASE = "https://s3.us.archive.org";
+
   async ls({ identifier = null, auth = newEmptyAuth() } = {}) {
     // throw new Error("TODO parse that XML");
     if (!identifier) {
@@ -268,14 +318,22 @@ class S3API {
     }
     return await (await fetch(`${this.API_BASE}/${identifier}`)).text();
   }
+
   async createEmptyItem({
-    identifier = null,
+    identifier,
     testItem = false,
     metadata = {},
     headers = {},
     wait = true,
     auth = newEmptyAuth(),
-  } = {}) {
+  }: {
+    identifier: string;
+    testItem?: boolean;
+    metadata?: Record<string, string>;
+    headers?: Record<string, string>;
+    wait?: boolean;
+    auth?: AuthData;
+  }) {
     return await this.upload({
       identifier,
       testItem,
@@ -286,10 +344,11 @@ class S3API {
       autocreate: true,
     });
   }
+
   async upload({
-    identifier = null,
-    key = null,
-    body = "",
+    identifier,
+    key,
+    body,
     autocreate = false,
     skipDerive = false,
     testItem = false,
@@ -298,33 +357,46 @@ class S3API {
     headers = {},
     wait = true,
     auth = newEmptyAuth(),
+  }: {
+    identifier: string;
+    key?: string;
+    body?: BodyInit;
+    autocreate?: boolean;
+    skipDerive?: boolean;
+    testItem?: boolean;
+    keepOldVersions?: boolean;
+    metadata?: Record<string, string>;
+    headers?: Record<string, string>;
+    wait?: boolean;
+    auth?: AuthData;
   }) {
     if (!identifier) {
       throw new Error("Missing required args");
     }
 
     if (testItem) {
-      metadata["collection"] = "test_collection";
+      metadata.collection = "test_collection";
     }
 
-    const requestHeaders = {};
-    Object.keys(metadata).forEach((k) => {
-      str2arr(metadata[k]).forEach((v, idx) => {
-        k = k.replace(/_/g, "--");
-        let headerKey = `x-archive-meta${idx}-${k}`;
+    const requestHeaders: Record<string, string> = {};
+    for (const k of Object.keys(metadata)) {
+      let i = 0;
+      for (const v of str2arr(metadata[k])) {
+        const headerKey = `x-archive-meta${i}-${k.replace(/_/g, "--")}`;
         requestHeaders[headerKey] = v;
-      });
-    });
+        i += 1;
+      }
+    }
 
     Object.assign(requestHeaders, headers, authToHeaderS3(auth));
 
     if (autocreate) {
-      requestHeaders["x-archive-auto-make-bucket"] = 1;
+      requestHeaders["x-archive-auto-make-bucket"] = "1";
     }
     if (skipDerive) {
-      requestHeaders["x-archive-queue-derive"] = 0;
+      requestHeaders["x-archive-queue-derive"] = "0";
     }
-    requestHeaders["x-archive-keep-old-version"] = keepOldVersions ? 1 : 0;
+    requestHeaders["x-archive-keep-old-version"] = keepOldVersions ? "1" : "0";
 
     const requestUrl = key
       ? `${this.API_BASE}/${identifier}/${key}`
@@ -350,40 +422,46 @@ class S3API {
   }
 }
 
+type SearchGetQuery = Record<string, unknown> | string;
+
 class SearchAPI {
-  constructor() {
-    this.API_BASE = "https://archive.org/advancedsearch.php";
-  }
-  async get({ q = null, page = 1, fields = ["identifier"], ...options } = {}) {
-    if (!q) {
-      throw new Error("Missing required arg 'q'");
-    }
-    if (typeof q == "object") {
+  API_BASE = "https://archive.org/advancedsearch.php";
+
+  async get({
+    q,
+    page,
+    fields,
+    ...options
+  }: { q: SearchGetQuery; page?: number; fields?: string[] } & Record<
+    string,
+    unknown
+  >) {
+    if (typeof q === "object") {
       q = this.buildQueryFromObject(q);
     }
-    const reqParams = {
+    const params = new URLSearchParams({
       q,
-      page,
-      fl: fields,
+      page: String(page ?? 1),
+      fl: (fields ?? ["identifier"]).toString(),
       ...options,
       output: "json",
-    };
-    const encodedParams = paramify(reqParams);
-    const url = `${this.API_BASE}?${encodedParams}`;
+    });
+    const url = `${this.API_BASE}?${params}`;
     return fetchJson(url);
   }
-  async search(q) {
+
+  async search(q: SearchGetQuery) {
     return await this.get({ q });
   }
-  buildQueryFromObject(qObject) {
+
+  buildQueryFromObject(qObject: Record<string, unknown>) {
     // Map dictionary to a key=val search query
     return Object.keys(qObject)
       .map((key) => {
         if (Array.isArray(qObject[key])) {
           return `${key}:( ${qObject[key].map((v) => `"${v}"`).join(" OR ")} )`;
-        } else {
-          return `${key}:"${qObject[key]}"`;
         }
+        return `${key}:"${qObject[key]}"`;
       })
       .join(" AND ");
   }
@@ -392,45 +470,49 @@ class SearchAPI {
 class SearchTextAPI {}
 
 class ViewsAPI {
-  constructor() {
-    // https://be-api.us.archive.org/views/v1/short/<identifier>[,<identifier>,...]
-    this.API_BASE = "https://be-api.us.archive.org/views/v1/short";
-  }
-  async get({ identifier = null } = {}) {
-    identifier = Array.isArray(identifier) ? identifier.join(",") : identifier;
-    return fetchJson(`${this.API_BASE}/${identifier}`);
+  // https://be-api.us.archive.org/views/v1/short/<identifier>[,<identifier>,...]
+  API_BASE = "https://be-api.us.archive.org/views/v1/short";
+
+  async get({ identifier }: { identifier: string | string[] }) {
+    return fetchJson(
+      `${this.API_BASE}/${
+        Array.isArray(identifier) ? identifier.join(",") : identifier
+      }`,
+    );
   }
 }
 
 class WaybackAPI {
-  constructor() {
-    this.AVAILABLE_API_BASE = "https://archive.org/wayback/available";
-    this.CDX_API_BASE = corsWorkAround("https://web.archive.org/cdx/search/");
-    this.SAVE_API_BASE = corsWorkAround("https://web.archive.org/save/");
-  }
+  AVAILABLE_API_BASE = "https://archive.org/wayback/available";
+  CDX_API_BASE = corsWorkAround("https://web.archive.org/cdx/search/");
+  SAVE_API_BASE = corsWorkAround("https://web.archive.org/save/");
+
   /**
    * @see https://archive.org/help/wayback_api.php
    */
-  async available({ url = null, timestamp = null } = {}) {
-    const params = { url };
-    if (timestamp !== null) {
-      params.timestamp = timestamp;
+  async available({
+    url,
+    timestamp,
+  }: { url: string; timestamp?: string | null }) {
+    const params = new URLSearchParams({ url });
+    if (timestamp != null) {
+      params.set("timestamp", timestamp);
     }
-    const searchParams = paramify(params);
-    const response = await fetch(
-      `${this.AVAILABLE_API_BASE}?${searchParams}`
-    );
+    const response = await fetch(`${this.AVAILABLE_API_BASE}?${params}`);
     return await response.json();
   }
+
   /**
    * @see https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server
    */
-  async cdx(options = {}) {
-    options.output = "json";
-    const searchParams = paramify(options);
-    const response = await fetch(`${this.CDX_API_BASE}?${searchParams}`);
+  async cdx(options: Record<string, unknown>) {
+    const params = new URLSearchParams({
+      ...options,
+      output: "json",
+    });
+    const response = await fetch(`${this.CDX_API_BASE}?${params}`);
     const raw = await response.text();
-    let json;
+    let json: unknown;
     try {
       json = JSON.parse(raw);
     } catch (e) {
@@ -442,29 +524,59 @@ class WaybackAPI {
    * @see https://docs.google.com/document/d/1Nsv52MvSjbLb2PCpHlat0gkzw0EvtSgpKHu4mk0MnrA/edit
    */
   async savePageNow({
-    url = null,
-    captureOutlinks = 0,
+    url,
+    captureOutlinks = false,
     captureAll = true,
     captureScreenshot = false,
     skipFirstArchive = true,
-    ifNotArchivedWithin = null,
+    ifNotArchivedWithin,
     auth = newEmptyAuth(),
-  } = {}) {
-    url = url.replace(/^https?\:\/\//, "");
-    const params = {
-      url,
-      capture_outlinks: captureOutlinks,
-      capture_all: captureAll ? "1" : "0",
+  }: {
+    url: string;
+    /**
+     * Capture web page outlinks automatically. This also applies to PDF,
+     * JSON, RSS and MRSS feeds.
+     */
+    captureOutlinks?: boolean;
+    /**
+     * Capture a web page with errors (HTTP status=4xx or 5xx). By default
+     * SPN2 captures only status=200 URLs.
+     */
+    captureAll?: boolean;
+    /**
+     * Capture full page screenshot in PNG format. This is also stored in
+     * the Wayback Machine as a different capture.
+     */
+    captureScreenshot?: boolean;
+    /**
+     * Skip checking if a capture is a first if you don’t need this
+     * information. This will make captures run faster.
+     */
+    skipFirstArchive?: boolean;
+    /**
+     * Capture web page only if the latest existing capture at the Archive is
+     * older than the provided limit. Its format could be any datetime
+     * expression like "3d 5h 20m" or just a number of seconds, e.g. `120`.
+     * If there is a capture within the defined timedelta, SPN2 returns that
+     * as a recent capture. The default value is 45 min.
+     */
+    ifNotArchivedWithin?: string | number;
+    auth?: AuthData;
+  }) {
+    const params = new URLSearchParams({
+      url: url.replace(/^https?\:\/\//, ""),
+      capture_outlinks: captureOutlinks ? "1" : "0",
       capture_screenshot: captureScreenshot ? "1" : "0",
+      capture_all: captureAll ? "1" : "0",
       skip_first_archive: skipFirstArchive ? "1" : "0",
-    };
+    });
     if (ifNotArchivedWithin) {
-      params.if_not_archived_within = ifNotArchivedWithin;
+      params.set("if_not_archived_within", String(ifNotArchivedWithin));
     }
     const response = await fetch(this.SAVE_API_BASE, {
       credentials: "omit",
       method: "POST",
-      body: paramify(params),
+      body: params,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",
@@ -485,54 +597,63 @@ class ZipFileAPI {
       throw new Error("Invalid zip type");
     }
     const requestUrl = corsWorkAround(
-      `https://archive.org/download/${identifier}/${enc(zipPath)}/`
+      `https://archive.org/download/${identifier}/${enc(zipPath)}/`,
     );
     const response = await fetch(requestUrl, {
       headers: authToHeaderCookies(auth),
     });
-    if (response.status != 200) {
-      throw Error({ error: "not found" });
+    if (response.status !== 200) {
+      throw Error("not found");
     }
 
     const html = await response.text();
+    let tableHtml = html;
 
     // This page has <td>'s without closing el tags (took a while to
     // figure this out). This breaks the DOMparser, so I added a workaround
     // to add closing tags
-    let tableHtml = html.match(/(<table class="archext">[\w\W]*<\/table>)/g)[0];
-    tableHtml = tableHtml.replace(
-      /(<td[^>]*>[\w\W]*?)(?=<(?:td|\/tr))/g,
-      "$1</td>"
-    );
+    const match = html.match(/(<table class="archext">[\w\W]*<\/table>)/g);
+    if (match) {
+      tableHtml = match[0].replace(
+        /(<td[^>]*>[\w\W]*?)(?=<(?:td|\/tr))/g,
+        "$1</td>",
+      );
+    }
 
-    let table = new DOMParser().parseFromString(tableHtml);
+    const table = new DOMParser().parseFromString(tableHtml);
     const rows = table.getElementsByTagName("tr");
-    const results = [];
+    const results: {
+      key: string | null;
+      href: string;
+      jpegUrl: string | null;
+      timestamp: string | null;
+      size: string | null;
+    }[] = [];
     for (let i = 0; i < rows.length; i++) {
-      let cells = rows.item(i).getElementsByTagName("td");
-      if (cells.length != 4) continue;
+      const cells =
+        rows.item(i)?.getElementsByTagName("td") ?? new HTMLCollection();
+      if (cells.length !== 4) continue;
       try {
-        let a = cells.item(0).getElementsByTagName("a").item(0);
-        results.push({
-          key: a.textContent,
-          href: "https:" + a.getAttribute("href"),
-          jpegUrl: (() => {
-            try {
-              return (
-                "https:" +
-                cells
+        const a = cells.item(0)?.getElementsByTagName("a").item(0);
+        if (a) {
+          results.push({
+            key: a.textContent,
+            href: `https:${a.getAttribute("href")}`,
+            jpegUrl: (() => {
+              try {
+                const href = cells
                   .item(1)
-                  .getElementsByTagName("a")
+                  ?.getElementsByTagName("a")
                   .item(0)
-                  .getAttribute("href")
-              );
-            } catch (e) {
+                  ?.getAttribute("href");
+                if (href) return `https:${href}`;
+              } catch {}
               return null;
-            }
-          })(),
-          timestamp: cells.item(2).textContent,
-          size: cells.item(3).textContent,
-        });
+            })(),
+            timestamp: cells.item(2)?.textContent ?? null,
+            size: cells.item(3)?.textContent ?? null,
+          });
+        }
       } catch (e) {}
     }
     return results;

@@ -1,181 +1,198 @@
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 (function (global, factory) {
-  (typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('node-fetch'), require('xmldom')) : typeof define === 'function' && define.amd ? define(['node-fetch', 'xmldom'], factory) : (global = global || self, global.ia = factory(global.fetch, global.xmldom));
-})(this, function (fetch, xmldom) {
+  (typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('xmldom')) : typeof define === 'function' && define.amd ? define(['xmldom'], factory) : (global = global || self, global.ia = factory(global.xmldom));
+})(this, function (xmldom) {
   'use strict';
 
-  fetch = fetch && Object.prototype.hasOwnProperty.call(fetch, 'default') ? fetch['default'] : fetch;
-  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-  function createCommonjsModule(fn, module) {
-    return module = {
-      exports: {}
-    }, fn(module, module.exports), module.exports;
+  /******************************************************************************
+  Copyright (c) Microsoft Corporation.
+    Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted.
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+  PERFORMANCE OF THIS SOFTWARE.
+  ***************************************************************************** */
+  var _assign = function __assign() {
+    _assign = Object.assign || function __assign(t) {
+      for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+      }
+      return t;
+    };
+    return _assign.apply(this, arguments);
+  };
+  function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+    }
+    return t;
   }
-
-  var fetchJsonp = createCommonjsModule(function (module, exports) {
-    (function (global, factory) {
-      {
-        factory(exports, module);
-      }
-    })(commonjsGlobal, function (exports, module) {
-      var defaultOptions = {
-        timeout: 5000,
-        jsonpCallback: 'callback',
-        jsonpCallbackFunction: null
-      };
-
-      function generateCallbackFunction() {
-        return 'jsonp_' + Date.now() + '_' + Math.ceil(Math.random() * 100000);
-      }
-
-      function clearFunction(functionName) {
-        // IE8 throws an exception when you try to delete a property on window
-        // http://stackoverflow.com/a/1824228/751089
+  function __awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function (resolve) {
+        resolve(value);
+      });
+    }
+    return new (P || (P = Promise))(function (resolve, reject) {
+      function fulfilled(value) {
         try {
-          delete window[functionName];
+          step(generator.next(value));
         } catch (e) {
-          window[functionName] = undefined;
+          reject(e);
         }
       }
-
-      function removeScript(scriptId) {
-        var script = document.getElementById(scriptId);
-
-        if (script) {
-          document.getElementsByTagName('head')[0].removeChild(script);
-        }
-      }
-
-      function fetchJsonp(_url) {
-        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1]; // to avoid param reassign
-
-        var url = _url;
-        var timeout = options.timeout || defaultOptions.timeout;
-        var jsonpCallback = options.jsonpCallback || defaultOptions.jsonpCallback;
-        var timeoutId = undefined;
-        return new Promise(function (resolve, reject) {
-          var callbackFunction = options.jsonpCallbackFunction || generateCallbackFunction();
-          var scriptId = jsonpCallback + '_' + callbackFunction;
-
-          window[callbackFunction] = function (response) {
-            resolve({
-              ok: true,
-              // keep consistent with fetch API
-              json: function json() {
-                return Promise.resolve(response);
-              }
-            });
-            if (timeoutId) clearTimeout(timeoutId);
-            removeScript(scriptId);
-            clearFunction(callbackFunction);
-          }; // Check if the user set their own params, and if not add a ? to start a list of params
-
-
-          url += url.indexOf('?') === -1 ? '?' : '&';
-          var jsonpScript = document.createElement('script');
-          jsonpScript.setAttribute('src', '' + url + jsonpCallback + '=' + callbackFunction);
-
-          if (options.charset) {
-            jsonpScript.setAttribute('charset', options.charset);
-          }
-
-          jsonpScript.id = scriptId;
-          document.getElementsByTagName('head')[0].appendChild(jsonpScript);
-          timeoutId = setTimeout(function () {
-            reject(new Error('JSONP request to ' + _url + ' timed out'));
-            clearFunction(callbackFunction);
-            removeScript(scriptId);
-
-            window[callbackFunction] = function () {
-              clearFunction(callbackFunction);
-            };
-          }, timeout); // Caught if got 404/500
-
-          jsonpScript.onerror = function () {
-            reject(new Error('JSONP request to ' + _url + ' failed'));
-            clearFunction(callbackFunction);
-            removeScript(scriptId);
-            if (timeoutId) clearTimeout(timeoutId);
-          };
-        });
-      } // export as global function
-
-      /*
-      let local;
-      if (typeof global !== 'undefined') {
-        local = global;
-      } else if (typeof self !== 'undefined') {
-        local = self;
-      } else {
+      function rejected(value) {
         try {
-          local = Function('return this')();
+          step(generator["throw"](value));
         } catch (e) {
-          throw new Error('polyfill failed because global object is unavailable in this environment');
+          reject(e);
         }
       }
-      local.fetchJsonp = fetchJsonp;
-      */
-
-
-      module.exports = fetchJsonp;
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-  });
+  }
+  function __generator(thisArg, body) {
+    var _ = {
+        label: 0,
+        sent: function sent() {
+          if (t[0] & 1) throw t[1];
+          return t[1];
+        },
+        trys: [],
+        ops: []
+      },
+      f,
+      y,
+      t,
+      g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+      return this;
+    }), g;
+    function verb(n) {
+      return function (v) {
+        return step([n, v]);
+      };
+    }
+    function step(op) {
+      if (f) throw new TypeError("Generator is already executing.");
+      while (g && (g = 0, op[0] && (_ = 0)), _) try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+        if (y = 0, t) op = [op[0] & 2, t.value];
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+          case 4:
+            _.label++;
+            return {
+              value: op[1],
+              done: false
+            };
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+          case 7:
+            op = _.ops.pop();
+            _.trys.pop();
+            continue;
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+              _.ops.push(op);
+              break;
+            }
+            if (t[2]) _.ops.pop();
+            _.trys.pop();
+            continue;
+        }
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+      if (op[0] & 5) throw op[1];
+      return {
+        value: op[0] ? op[1] : void 0,
+        done: true
+      };
+    }
+  }
+  var _SuppressedError = typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+  };
   var CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
   var enc = encodeURIComponent;
-
   var paramify = function paramify(obj) {
     return new URLSearchParams(obj).toString();
   };
-
   var str2arr = function str2arr(v) {
     return Array.isArray(v) ? v : [v];
   };
-
   var isInBrowser = function isInBrowser() {
     return !(typeof window === "undefined");
   };
-
   var corsWorkAround = function corsWorkAround(url) {
     if (isInBrowser()) {
       return "".concat(CORS_PROXY, "/").concat(url);
-    } else {
-      return url;
     }
+    return url;
   };
-
   var fetchJson = function fetchJson(url, options) {
-    return Promise.resolve().then(function () {
-      return fetch(url, options);
-    }).then(function (_resp) {
-      var res = _resp;
-      return res.json();
+    return __awaiter(void 0, void 0, void 0, function () {
+      var res;
+      return __generator(this, function (_a) {
+        switch (_a.label) {
+          case 0:
+            return [4 /*yield*/, fetch(url, options ? _assign({
+              method: "GET"
+            }, options) : {
+              method: "GET"
+            })];
+          case 1:
+            res = _a.sent();
+            return [4 /*yield*/, res.json()];
+          case 2:
+            return [2 /*return*/, _a.sent()];
+        }
+      });
     });
   };
-
   var authToHeaderS3 = function authToHeaderS3(auth) {
-    return auth.values.s3.access && auth.values.s3.secret ? {
-      Authorization: "LOW ".concat(auth.values.s3.access, ":").concat(auth.values.s3.secret)
-    } : {};
+    var headers = new Headers();
+    if (auth.values.s3.access && auth.values.s3.secret) {
+      headers.set("Authorization", "LOW ".concat(auth.values.s3.access, ":").concat(auth.values.s3.secret));
+    }
+    return headers;
   };
-
   var authToHeaderCookies = function authToHeaderCookies(auth) {
     if (auth.values.cookies["logged-in-sig"] && auth.values.cookies["logged-in-user"]) {
       var cookieStr = "logged-in-sig=".concat(auth.values.cookies["logged-in-sig"], ";");
@@ -183,17 +200,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       var headers = {
         Cookie: cookieStr
       };
-
       if (isInBrowser()) {
         headers["X-Cookie-Cors"] = cookieStr;
       }
-
       return headers;
-    } else {
-      return {};
     }
+    return {};
   };
-
   var newEmptyAuth = function newEmptyAuth() {
     return JSON.parse(JSON.stringify({
       success: false,
@@ -213,663 +226,586 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       version: 1
     }));
   };
-
-  var Auth = /*#__PURE__*/function () {
+  var Auth = /** @class */function () {
     function Auth() {
-      _classCallCheck(this, Auth);
-
       this.XAUTH_BASE = corsWorkAround("https://archive.org/services/xauthn/");
     }
-
-    _createClass(Auth, [{
-      key: "login",
-      value: function login(email, password) {
-        var _this2 = this;
-
-        return Promise.resolve().then(function () {
-          return Promise.resolve().then(function () {
-            var fetchOptions = {
-              method: "POST",
-              body: "email=".concat(enc(email), "&password=").concat(enc(password)),
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+    Auth.prototype.login = function (email, password) {
+      return __awaiter(this, void 0, void 0, function () {
+        var fetchOptions, response, data, e_1;
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              _a.trys.push([0, 3,, 4]);
+              fetchOptions = {
+                method: "POST",
+                body: new URLSearchParams({
+                  email: email,
+                  password: password
+                }),
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded"
+                }
+              };
+              return [4 /*yield*/, fetch("".concat(this.XAUTH_BASE, "?op=login"), fetchOptions)];
+            case 1:
+              response = _a.sent();
+              return [4 /*yield*/, response.json()];
+            case 2:
+              data = _a.sent();
+              if (!data.success) {
+                data.values = _assign(_assign({}, data.values), newEmptyAuth().values);
               }
-            };
-            return fetch("".concat(_this2.XAUTH_BASE, "?op=login"), fetchOptions);
-          }).then(function (_resp) {
-            var response = _resp;
-            return response.json();
-          }).then(function (_resp) {
-            var data = _resp;
-
-            if (!data.success) {
-              data.values = _objectSpread(_objectSpread({}, data.values), newEmptyAuth().values);
-            }
-
-            return data;
-          })["catch"](function (e) {
-            // TODO figure out syntax for catching error response
-            return newEmptyAuth();
-          });
-        }).then(function () {});
-      }
-    }, {
-      key: "fromS3",
-      value: function fromS3(access, secret) {
-        var newAuth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : newEmptyAuth();
-        return Promise.resolve().then(function () {
-          newAuth.success = 1;
-          newAuth.values.s3.access = access;
-          newAuth.values.s3.secret = secret;
-          return fetchJson("https://s3.us.archive.org?check_auth=1", {
-            headers: authToHeaderS3(newAuth)
-          });
-        }).then(function (_resp) {
-          var info = _resp;
-          newAuth.values.email = info.username;
-          newAuth.values.itemname = info.itemname;
-          newAuth.values.screenname = info.screenname; // Note the auth object is missing cookie fields.
-          // It is still TBD if those are needed
-
-          return newAuth;
-        });
-      }
-    }, {
-      key: "fromCookies",
-      value: function fromCookies(loggedInSig, loggedInUser) {
-        var newAuth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : newEmptyAuth();
-
-        var _this4 = this;
-
-        return Promise.resolve().then(function () {
-          newAuth.values.cookies["logged-in-sig"] = loggedInSig;
-          newAuth.values.cookies["logged-in-user"] = loggedInUser;
-          return fetch(corsWorkAround("https://archive.org/account/s3.php?output_json=1"), {
-            headers: authToHeaderCookies(newAuth)
-          });
-        }).then(function (_resp) {
-          var s3response = _resp;
-          return s3response.json();
-        }).then(function (_resp) {
-          var s3 = _resp;
-
-          if (!s3.success) {
-            throw new Error();
+              return [2 /*return*/, data];
+            case 3:
+              e_1 = _a.sent();
+              // TODO figure out syntax for catching error response
+              return [2 /*return*/, newEmptyAuth()];
+            case 4:
+              return [2 /*return*/];
           }
-
-          return _this4.fromS3(s3.key.s3accesskey, s3.key.s3secretkey, newAuth);
         });
-      }
-    }]);
-
+      });
+    };
+    Auth.prototype.fromS3 = function (access_1, secret_1) {
+      return __awaiter(this, arguments, void 0, function (access, secret, newAuth) {
+        var info;
+        if (newAuth === void 0) {
+          newAuth = newEmptyAuth();
+        }
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              newAuth.success = 1;
+              newAuth.values.s3.access = access;
+              newAuth.values.s3.secret = secret;
+              return [4 /*yield*/, fetchJson("https://s3.us.archive.org?check_auth=1", {
+                headers: authToHeaderS3(newAuth)
+              })];
+            case 1:
+              info = _a.sent();
+              newAuth.values.email = info.username;
+              newAuth.values.itemname = info.itemname;
+              newAuth.values.screenname = info.screenname;
+              // Note the auth object is missing cookie fields.
+              // It is still TBD if those are needed
+              return [2 /*return*/, newAuth];
+          }
+        });
+      });
+    };
+    Auth.prototype.fromCookies = function (loggedInSig_1, loggedInUser_1) {
+      return __awaiter(this, arguments, void 0, function (loggedInSig, loggedInUser, newAuth) {
+        var s3response, s3;
+        if (newAuth === void 0) {
+          newAuth = newEmptyAuth();
+        }
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              newAuth.values.cookies["logged-in-sig"] = loggedInSig;
+              newAuth.values.cookies["logged-in-user"] = loggedInUser;
+              return [4 /*yield*/, fetch(corsWorkAround("https://archive.org/account/s3.php?output_json=1"), {
+                headers: authToHeaderCookies(newAuth)
+              })];
+            case 1:
+              s3response = _a.sent();
+              return [4 /*yield*/, s3response.json()];
+            case 2:
+              s3 = _a.sent();
+              if (!s3.success) {
+                throw new Error();
+              }
+              return [4 /*yield*/, this.fromS3(s3.key.s3accesskey, s3.key.s3secretkey, newAuth)];
+            case 3:
+              return [2 /*return*/, _a.sent()];
+          }
+        });
+      });
+    };
     return Auth;
   }();
-
-  var BookReaderAPI = function BookReaderAPI() {
-    _classCallCheck(this, BookReaderAPI);
-  };
-
-  var FavoritesAPI = /*#__PURE__*/function () {
+  var BookReaderAPI = /** @class */function () {
+    function BookReaderAPI() {}
+    return BookReaderAPI;
+  }();
+  var FavoritesAPI = /** @class */function () {
     function FavoritesAPI() {
-      _classCallCheck(this, FavoritesAPI);
-
-      this.API_BASE = corsWorkAround("https://archive.org/bookmarks.php"); // TODO support this non-json explore endpoint
-
+      this.API_BASE = corsWorkAround("https://archive.org/bookmarks.php");
       this.EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
     }
-
-    _createClass(FavoritesAPI, [{
-      key: "get",
-      value: function get(_ref) {
-        var _ref$screenname = _ref.screenname,
-            screenname = _ref$screenname === void 0 ? null : _ref$screenname,
-            _ref$auth = _ref.auth,
-            auth = _ref$auth === void 0 ? newEmptyAuth() : _ref$auth;
-
-        var _this5 = this;
-
-        return Promise.resolve().then(function () {
-          if (!screenname && auth.values.screenname) {
-            screenname = auth.values.screenname;
+    FavoritesAPI.prototype.get = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var params;
+        var _c = _b.screenname,
+          screenname = _c === void 0 ? null : _c,
+          _d = _b.auth,
+          auth = _d === void 0 ? newEmptyAuth() : _d;
+        return __generator(this, function (_e) {
+          switch (_e.label) {
+            case 0:
+              if (!screenname && auth.values.screenname) {
+                screenname = auth.values.screenname;
+              }
+              if (!screenname) return [3 /*break*/, 2];
+              params = {
+                output: "json",
+                screenname: screenname
+              };
+              return [4 /*yield*/, fetchJson("".concat(this.API_BASE, "?").concat(paramify(params)))];
+            case 1:
+              return [2 /*return*/, _e.sent()];
+            case 2:
+              throw new Error("Neither screenname or auth provided for bookmarks lookup");
           }
-
-          if (screenname) {
-            var params = {
-              output: "json",
-              screenname: screenname
-            };
-            return fetchJson("".concat(_this5.API_BASE, "?").concat(paramify(params)));
-          } else {
-            throw new Error("Neither screenname or auth provided for bookmarks lookup");
+        });
+      });
+    };
+    FavoritesAPI.prototype.add = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var identifier = _b.identifier,
+          _c = _b.auth,
+          auth = _c === void 0 ? newEmptyAuth() : _c;
+        return __generator(this, function (_d) {
+          switch (_d.label) {
+            case 0:
+              return [4 /*yield*/, this.modify({
+                identifier: identifier,
+                add_bookmark: 1
+              }, auth)];
+            case 1:
+              return [2 /*return*/, _d.sent()];
           }
         });
-      }
-    }, {
-      key: "add",
-      value: function add() {
-        var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref2$identifier = _ref2.identifier,
-            identifier = _ref2$identifier === void 0 ? null : _ref2$identifier,
-            _ref2$comments = _ref2.comments,
-            comments = _ref2$comments === void 0 ? "" : _ref2$comments,
-            _ref2$auth = _ref2.auth,
-            auth = _ref2$auth === void 0 ? newEmptyAuth() : _ref2$auth;
-
-        var _this6 = this;
-
-        return Promise.resolve().then(function () {
-          return _this6.modify({
-            identifier: identifier,
-            add_bookmark: 1
-          }, auth);
+      });
+    };
+    FavoritesAPI.prototype.remove = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var identifier = _b.identifier,
+          _c = _b.auth,
+          auth = _c === void 0 ? newEmptyAuth() : _c;
+        return __generator(this, function (_d) {
+          switch (_d.label) {
+            case 0:
+              return [4 /*yield*/, this.modify({
+                identifier: identifier,
+                del_bookmark: identifier
+              }, auth)];
+            case 1:
+              return [2 /*return*/, _d.sent()];
+          }
         });
-      }
-    }, {
-      key: "remove",
-      value: function remove() {
-        var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref3$identifier = _ref3.identifier,
-            identifier = _ref3$identifier === void 0 ? null : _ref3$identifier,
-            _ref3$auth = _ref3.auth,
-            auth = _ref3$auth === void 0 ? null : _ref3$auth;
-
-        var _this7 = this;
-
-        return Promise.resolve().then(function () {
-          return _this7.modify({
-            identifier: identifier,
-            del_bookmark: identifier
-          }, auth);
+      });
+    };
+    FavoritesAPI.prototype.modify = function (params, auth) {
+      return __awaiter(this, void 0, void 0, function () {
+        var mdResponse, e_2, sparams, response;
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              _a.trys.push([0, 2,, 3]);
+              return [4 /*yield*/, iajs.MetadataAPI.get({
+                identifier: params.identifier,
+                path: "/metadata"
+              })];
+            case 1:
+              mdResponse = _a.sent();
+              params.title = str2arr(mdResponse.result.title).join(", ");
+              params.mediatype = mdResponse.result.mediatype;
+              return [3 /*break*/, 3];
+            case 2:
+              e_2 = _a.sent();
+              throw new Error("Metadata lookup failed for: ".concat(params.identifier));
+            case 3:
+              sparams = new URLSearchParams(_assign(_assign({}, params), {
+                output: "json"
+              }));
+              return [4 /*yield*/, fetch("".concat(this.API_BASE, "?").concat(sparams), {
+                method: "POST",
+                headers: authToHeaderCookies(auth)
+              })];
+            case 4:
+              response = _a.sent();
+              return [4 /*yield*/, response.json()["catch"](function (e) {
+                return {
+                  error: e
+                };
+              })];
+            case 5:
+              return [2 /*return*/, _a.sent()];
+          }
         });
-      }
-    }, {
-      key: "modify",
-      value: function modify(params, auth) {
-        var _this8 = this;
-
-        return Promise.resolve().then(function () {
-          return Promise.resolve().then(function () {
-            return iajs.MetadataAPI.get({
-              identifier: params.identifier,
-              path: "/metadata"
-            });
-          }).then(function (_resp) {
-            var mdResponse = _resp;
-            params.title = str2arr(mdResponse.result.title).join(", ");
-            params.mediatype = mdResponse.result.mediatype;
-          })["catch"](function (e) {
-            throw new Error("Metadata lookup failed for: ".concat(params.identifier));
-          });
-        }).then(function () {
-          params.output = "json";
-          return fetch("".concat(_this8.API_BASE, "?").concat(paramify(params)), {
-            method: "POST",
-            headers: authToHeaderCookies(auth)
-          });
-        }).then(function (_resp) {
-          var response = _resp;
-          return response.json()["catch"](function (e) {
-            return {
-              error: e
-            };
-          });
-        });
-      }
-    }]);
-
+      });
+    };
     return FavoritesAPI;
   }();
-
-  var GifcitiesAPI = /*#__PURE__*/function () {
+  var GifcitiesAPI = /** @class */function () {
     function GifcitiesAPI() {
-      _classCallCheck(this, GifcitiesAPI);
-
       this.API_BASE = "https://gifcities.archive.org/api/v1/gifsearch";
     }
-
-    _createClass(GifcitiesAPI, [{
-      key: "get",
-      value: function get() {
-        var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref4$q = _ref4.q,
-            q = _ref4$q === void 0 ? null : _ref4$q;
-
-        var _this9 = this;
-
-        return Promise.resolve().then(function () {
-          if (q === null) {
-            return [];
-          } else {
-            return fetchJson("".concat(_this9.API_BASE, "?q=").concat(enc(q)));
-          }
-        });
-      }
-    }, {
-      key: "search",
-      value: function search(q) {
-        var _this10 = this;
-
-        return Promise.resolve().then(function () {
-          return _this10.get({
+    GifcitiesAPI.prototype.get = function () {
+      return __awaiter(this, arguments, void 0, function (_a) {
+        var _b = _a === void 0 ? {} : _a,
+          q = _b.q;
+        return __generator(this, function (_c) {
+          if (q == null) return [2 /*return*/, []];
+          return [2 /*return*/, fetchJson("".concat(this.API_BASE, "?").concat(new URLSearchParams({
             q: q
-          });
+          })))];
         });
-      }
-    }]);
-
+      });
+    };
+    GifcitiesAPI.prototype.search = function (q) {
+      return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+          return [2 /*return*/, this.get({
+            q: q
+          })];
+        });
+      });
+    };
     return GifcitiesAPI;
   }();
-
-  var MetadataAPI = /*#__PURE__*/function () {
+  var MetadataAPI = /** @class */function () {
     function MetadataAPI() {
-      _classCallCheck(this, MetadataAPI);
-
       this.READ_API_BASE = "https://archive.org/metadata";
       this.WRITE_API_BASE = corsWorkAround("https://archive.org/metadata");
     }
-
-    _createClass(MetadataAPI, [{
-      key: "get",
-      value: function get() {
-        var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref5$identifier = _ref5.identifier,
-            identifier = _ref5$identifier === void 0 ? null : _ref5$identifier,
-            _ref5$path = _ref5.path,
-            path = _ref5$path === void 0 ? "" : _ref5$path,
-            _ref5$auth = _ref5.auth,
-            auth = _ref5$auth === void 0 ? newEmptyAuth() : _ref5$auth;
-
-        var _this11 = this;
-
-        return Promise.resolve().then(function () {
-          var options = {};
-          options.headers = authToHeaderS3(auth);
-          return fetchJson("".concat(_this11.READ_API_BASE, "/").concat(identifier, "/").concat(path), options);
+    MetadataAPI.prototype.get = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var identifier = _b.identifier,
+          _c = _b.path,
+          path = _c === void 0 ? "" : _c,
+          _d = _b.auth,
+          auth = _d === void 0 ? newEmptyAuth() : _d;
+        return __generator(this, function (_e) {
+          return [2 /*return*/, fetchJson("".concat(this.READ_API_BASE, "/").concat(identifier, "/").concat(path), {
+            headers: authToHeaderS3(auth)
+          })];
         });
-      }
-    }, {
-      key: "patch",
-      value: function patch() {
-        var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref6$identifier = _ref6.identifier,
-            identifier = _ref6$identifier === void 0 ? null : _ref6$identifier,
-            _ref6$target = _ref6.target,
-            target = _ref6$target === void 0 ? "metadata" : _ref6$target,
-            _ref6$priority = _ref6.priority,
-            priority = _ref6$priority === void 0 ? -5 : _ref6$priority,
-            _ref6$patch = _ref6.patch,
-            _patch = _ref6$patch === void 0 ? {} : _ref6$patch,
-            _ref6$auth = _ref6.auth,
-            auth = _ref6$auth === void 0 ? newEmptyAuth() : _ref6$auth;
-
-        var _this12 = this;
-
-        return Promise.resolve().then(function () {
-          // https://archive.org/services/docs/api/metadata.html#targets
-          var reqParams = {
-            "-target": target,
-            "-patch": JSON.stringify(_patch),
-            priority: priority,
-            secret: auth.values.s3.secret,
-            access: auth.values.s3.access
-          };
-          var url = "".concat(_this12.WRITE_API_BASE, "/").concat(identifier);
-          var body = paramify(reqParams);
-          return fetch(url, {
-            method: "POST",
-            body: body,
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded"
-            }
-          });
-        }).then(function (_resp) {
-          var response = _resp;
-          return response.json();
+      });
+    };
+    MetadataAPI.prototype.patch = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var body, url, response;
+        var identifier = _b.identifier,
+          _c = _b.target,
+          target = _c === void 0 ? "metadata" : _c,
+          _d = _b.priority,
+          priority = _d === void 0 ? -5 : _d,
+          _e = _b.patch,
+          patch = _e === void 0 ? {} : _e,
+          _f = _b.auth,
+          auth = _f === void 0 ? newEmptyAuth() : _f;
+        return __generator(this, function (_g) {
+          switch (_g.label) {
+            case 0:
+              body = new URLSearchParams({
+                "-target": target,
+                "-patch": JSON.stringify(patch),
+                priority: String(priority)
+              });
+              if (auth.values.s3.secret) body.set("secret", auth.values.s3.secret);
+              if (auth.values.s3.access) body.set("access", auth.values.s3.access);
+              url = "".concat(this.WRITE_API_BASE, "/").concat(identifier);
+              return [4 /*yield*/, fetch(url, {
+                method: "POST",
+                body: body,
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded"
+                }
+              })];
+            case 1:
+              response = _g.sent();
+              return [4 /*yield*/, response.json()];
+            case 2:
+              return [2 /*return*/, _g.sent()];
+          }
         });
-      }
-    }]);
-
+      });
+    };
     return MetadataAPI;
   }();
-
-  var RelatedAPI = /*#__PURE__*/function () {
+  var RelatedAPI = /** @class */function () {
     function RelatedAPI() {
-      _classCallCheck(this, RelatedAPI);
-
       this.API_BASE = "https://be-api.us.archive.org/mds/v1";
     }
-
-    _createClass(RelatedAPI, [{
-      key: "get",
-      value: function get() {
-        var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref7$identifier = _ref7.identifier,
-            identifier = _ref7$identifier === void 0 ? null : _ref7$identifier;
-
-        var _this13 = this;
-
-        return Promise.resolve().then(function () {
-          return fetchJson("".concat(_this13.API_BASE, "/get_related/all/").concat(identifier));
+    RelatedAPI.prototype.get = function () {
+      return __awaiter(this, arguments, void 0, function (_a) {
+        var _b = _a === void 0 ? {} : _a,
+          _c = _b.identifier,
+          identifier = _c === void 0 ? null : _c;
+        return __generator(this, function (_d) {
+          return [2 /*return*/, fetchJson("".concat(this.API_BASE, "/get_related/all/").concat(identifier))];
         });
-      }
-    }]);
-
+      });
+    };
     return RelatedAPI;
   }();
-
-  var ReviewsAPI = /*#__PURE__*/function () {
+  var ReviewsAPI = /** @class */function () {
     function ReviewsAPI() {
-      _classCallCheck(this, ReviewsAPI);
-
       this.WRITE_API_BASE = corsWorkAround("https://archive.org/services/reviews.php?identifier=");
       this.READ_API_BASE = "https://archive.org/metadata";
     }
-
-    _createClass(ReviewsAPI, [{
-      key: "get",
-      value: function get() {
-        var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref8$identifier = _ref8.identifier,
-            identifier = _ref8$identifier === void 0 ? null : _ref8$identifier;
-
-        var _this14 = this;
-
-        return Promise.resolve().then(function () {
-          return fetchJson("".concat(_this14.READ_API_BASE, "/").concat(identifier, "/reviews"));
+    ReviewsAPI.prototype.get = function () {
+      return __awaiter(this, arguments, void 0, function (_a) {
+        var _b = _a === void 0 ? {} : _a,
+          _c = _b.identifier,
+          identifier = _c === void 0 ? null : _c;
+        return __generator(this, function (_d) {
+          return [2 /*return*/, fetchJson("".concat(this.READ_API_BASE, "/").concat(identifier, "/reviews"))];
         });
-      }
-    }, {
-      key: "add",
-      value: function add() {
-        var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref9$identifier = _ref9.identifier,
-            identifier = _ref9$identifier === void 0 ? null : _ref9$identifier,
-            _ref9$title = _ref9.title,
-            title = _ref9$title === void 0 ? null : _ref9$title,
-            _ref9$body = _ref9.body,
-            body = _ref9$body === void 0 ? null : _ref9$body,
-            _ref9$stars = _ref9.stars,
-            stars = _ref9$stars === void 0 ? null : _ref9$stars,
-            _ref9$auth = _ref9.auth,
-            auth = _ref9$auth === void 0 ? newEmptyAuth() : _ref9$auth;
-
-        var _this15 = this;
-
-        return Promise.resolve().then(function () {
-          var url = "".concat(_this15.WRITE_API_BASE).concat(identifier);
-          return fetch(url, {
-            method: "POST",
-            body: JSON.stringify({
-              title: title,
-              body: body,
-              stars: stars
-            }),
-            headers: _objectSpread({
-              "Content-Type": "application/json"
-            }, authToHeaderS3(auth))
-          });
-        }).then(function (_resp) {
-          var response = _resp;
-          return response.json();
+      });
+    };
+    ReviewsAPI.prototype.add = function () {
+      return __awaiter(this, arguments, void 0, function (_a) {
+        var url, response;
+        var _b = _a === void 0 ? {} : _a,
+          _c = _b.identifier,
+          identifier = _c === void 0 ? null : _c,
+          _d = _b.title,
+          title = _d === void 0 ? null : _d,
+          _e = _b.body,
+          body = _e === void 0 ? null : _e,
+          _f = _b.stars,
+          stars = _f === void 0 ? null : _f,
+          _g = _b.auth,
+          auth = _g === void 0 ? newEmptyAuth() : _g;
+        return __generator(this, function (_h) {
+          switch (_h.label) {
+            case 0:
+              url = "".concat(this.WRITE_API_BASE).concat(identifier);
+              return [4 /*yield*/, fetch(url, {
+                method: "POST",
+                body: JSON.stringify({
+                  title: title,
+                  body: body,
+                  stars: stars
+                }),
+                headers: _assign({
+                  "Content-Type": "application/json"
+                }, authToHeaderS3(auth))
+              })];
+            case 1:
+              response = _h.sent();
+              return [4 /*yield*/, response.json()];
+            case 2:
+              return [2 /*return*/, _h.sent()];
+          }
         });
-      }
-    }]);
-
+      });
+    };
     return ReviewsAPI;
   }();
-
-  var S3API = /*#__PURE__*/function () {
+  var S3API = /** @class */function () {
     function S3API() {
-      _classCallCheck(this, S3API);
-
       this.API_BASE = "https://s3.us.archive.org";
     }
-
-    _createClass(S3API, [{
-      key: "ls",
-      value: function ls() {
-        var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref10$identifier = _ref10.identifier,
-            identifier = _ref10$identifier === void 0 ? null : _ref10$identifier,
-            _ref10$auth = _ref10.auth,
-            auth = _ref10$auth === void 0 ? newEmptyAuth() : _ref10$auth;
-
-        var _this16 = this;
-
-        return Promise.resolve().then(function () {
-          // throw new Error("TODO parse that XML");
-          if (!identifier) {
-            throw new Error("Missing required args");
-          }
-
-          return fetch("".concat(_this16.API_BASE, "/").concat(identifier));
-        }).then(function (_resp) {
-          return _resp.text();
-        });
-      }
-    }, {
-      key: "createEmptyItem",
-      value: function createEmptyItem() {
-        var _ref11 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref11$identifier = _ref11.identifier,
-            identifier = _ref11$identifier === void 0 ? null : _ref11$identifier,
-            _ref11$testItem = _ref11.testItem,
-            testItem = _ref11$testItem === void 0 ? false : _ref11$testItem,
-            _ref11$metadata = _ref11.metadata,
-            metadata = _ref11$metadata === void 0 ? {} : _ref11$metadata,
-            _ref11$headers = _ref11.headers,
-            headers = _ref11$headers === void 0 ? {} : _ref11$headers,
-            _ref11$wait = _ref11.wait,
-            wait = _ref11$wait === void 0 ? true : _ref11$wait,
-            _ref11$auth = _ref11.auth,
-            auth = _ref11$auth === void 0 ? newEmptyAuth() : _ref11$auth;
-
-        var _this17 = this;
-
-        return Promise.resolve().then(function () {
-          return _this17.upload({
-            identifier: identifier,
-            testItem: testItem,
-            metadata: metadata,
-            headers: headers,
-            wait: wait,
-            auth: auth,
-            autocreate: true
-          });
-        });
-      }
-    }, {
-      key: "upload",
-      value: function upload(_ref12) {
-        var _ref12$identifier = _ref12.identifier,
-            identifier = _ref12$identifier === void 0 ? null : _ref12$identifier,
-            _ref12$key = _ref12.key,
-            key = _ref12$key === void 0 ? null : _ref12$key,
-            _ref12$body = _ref12.body,
-            body = _ref12$body === void 0 ? "" : _ref12$body,
-            _ref12$autocreate = _ref12.autocreate,
-            autocreate = _ref12$autocreate === void 0 ? false : _ref12$autocreate,
-            _ref12$skipDerive = _ref12.skipDerive,
-            skipDerive = _ref12$skipDerive === void 0 ? false : _ref12$skipDerive,
-            _ref12$testItem = _ref12.testItem,
-            testItem = _ref12$testItem === void 0 ? false : _ref12$testItem,
-            _ref12$keepOldVersion = _ref12.keepOldVersions,
-            keepOldVersions = _ref12$keepOldVersion === void 0 ? true : _ref12$keepOldVersion,
-            _ref12$metadata = _ref12.metadata,
-            metadata = _ref12$metadata === void 0 ? {} : _ref12$metadata,
-            _ref12$headers = _ref12.headers,
-            headers = _ref12$headers === void 0 ? {} : _ref12$headers,
-            _ref12$wait = _ref12.wait,
-            wait = _ref12$wait === void 0 ? true : _ref12$wait,
-            _ref12$auth = _ref12.auth,
-            auth = _ref12$auth === void 0 ? newEmptyAuth() : _ref12$auth;
-
-        var _this18 = this;
-
-        return Promise.resolve().then(function () {
-          if (!identifier) {
-            throw new Error("Missing required args");
-          }
-
-          if (testItem) {
-            metadata["collection"] = "test_collection";
-          }
-
-          var requestHeaders = {};
-          Object.keys(metadata).forEach(function (k) {
-            str2arr(metadata[k]).forEach(function (v, idx) {
-              k = k.replace(/_/g, "--");
-              var headerKey = "x-archive-meta".concat(idx, "-").concat(k);
-              requestHeaders[headerKey] = v;
-            });
-          });
-          Object.assign(requestHeaders, headers, authToHeaderS3(auth));
-
-          if (autocreate) {
-            requestHeaders["x-archive-auto-make-bucket"] = 1;
-          }
-
-          if (skipDerive) {
-            requestHeaders["x-archive-queue-derive"] = 0;
-          }
-
-          requestHeaders["x-archive-keep-old-version"] = keepOldVersions ? 1 : 0;
-          var requestUrl = key ? "".concat(_this18.API_BASE, "/").concat(identifier, "/").concat(key) : "".concat(_this18.API_BASE, "/").concat(identifier);
-          return fetch(requestUrl, {
-            method: "PUT",
-            headers: requestHeaders,
-            body: body
-          });
-        }).then(function (_resp) {
-          var response = _resp;
-
-          if (response.status !== 200) {
-            // NOTE this may not be the right thing to check.
-            // Maybe different codes are okay
-            throw new Error("Response: ".concat(response.status));
-          }
-
-          if (!wait) {
-            return response;
-          } else {
-            // The finished response seems to be empty
-            return response.text();
+    S3API.prototype.ls = function () {
+      return __awaiter(this, arguments, void 0, function (_a) {
+        var _b = _a === void 0 ? {} : _a,
+          _c = _b.identifier,
+          identifier = _c === void 0 ? null : _c,
+          _d = _b.auth,
+          auth = _d === void 0 ? newEmptyAuth() : _d;
+        return __generator(this, function (_e) {
+          switch (_e.label) {
+            case 0:
+              // throw new Error("TODO parse that XML");
+              if (!identifier) {
+                throw new Error("Missing required args");
+              }
+              return [4 /*yield*/, fetch("".concat(this.API_BASE, "/").concat(identifier))];
+            case 1:
+              return [4 /*yield*/, _e.sent().text()];
+            case 2:
+              return [2 /*return*/, _e.sent()];
           }
         });
-      }
-    }]);
-
+      });
+    };
+    S3API.prototype.createEmptyItem = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var identifier = _b.identifier,
+          _c = _b.testItem,
+          testItem = _c === void 0 ? false : _c,
+          _d = _b.metadata,
+          metadata = _d === void 0 ? {} : _d,
+          _e = _b.headers,
+          headers = _e === void 0 ? {} : _e,
+          _f = _b.wait,
+          wait = _f === void 0 ? true : _f,
+          _g = _b.auth,
+          auth = _g === void 0 ? newEmptyAuth() : _g;
+        return __generator(this, function (_h) {
+          switch (_h.label) {
+            case 0:
+              return [4 /*yield*/, this.upload({
+                identifier: identifier,
+                testItem: testItem,
+                metadata: metadata,
+                headers: headers,
+                wait: wait,
+                auth: auth,
+                autocreate: true
+              })];
+            case 1:
+              return [2 /*return*/, _h.sent()];
+          }
+        });
+      });
+    };
+    S3API.prototype.upload = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var requestHeaders, _i, _c, k, i, _d, _e, v, headerKey, requestUrl, response;
+        var identifier = _b.identifier,
+          key = _b.key,
+          body = _b.body,
+          _f = _b.autocreate,
+          autocreate = _f === void 0 ? false : _f,
+          _g = _b.skipDerive,
+          skipDerive = _g === void 0 ? false : _g,
+          _h = _b.testItem,
+          testItem = _h === void 0 ? false : _h,
+          _j = _b.keepOldVersions,
+          keepOldVersions = _j === void 0 ? true : _j,
+          _k = _b.metadata,
+          metadata = _k === void 0 ? {} : _k,
+          _l = _b.headers,
+          headers = _l === void 0 ? {} : _l,
+          _m = _b.wait,
+          wait = _m === void 0 ? true : _m,
+          _o = _b.auth,
+          auth = _o === void 0 ? newEmptyAuth() : _o;
+        return __generator(this, function (_p) {
+          switch (_p.label) {
+            case 0:
+              if (!identifier) {
+                throw new Error("Missing required args");
+              }
+              if (testItem) {
+                metadata.collection = "test_collection";
+              }
+              requestHeaders = {};
+              for (_i = 0, _c = Object.keys(metadata); _i < _c.length; _i++) {
+                k = _c[_i];
+                i = 0;
+                for (_d = 0, _e = str2arr(metadata[k]); _d < _e.length; _d++) {
+                  v = _e[_d];
+                  headerKey = "x-archive-meta".concat(i, "-").concat(k.replace(/_/g, "--"));
+                  requestHeaders[headerKey] = v;
+                  i += 1;
+                }
+              }
+              Object.assign(requestHeaders, headers, authToHeaderS3(auth));
+              if (autocreate) {
+                requestHeaders["x-archive-auto-make-bucket"] = "1";
+              }
+              if (skipDerive) {
+                requestHeaders["x-archive-queue-derive"] = "0";
+              }
+              requestHeaders["x-archive-keep-old-version"] = keepOldVersions ? "1" : "0";
+              requestUrl = key ? "".concat(this.API_BASE, "/").concat(identifier, "/").concat(key) : "".concat(this.API_BASE, "/").concat(identifier);
+              return [4 /*yield*/, fetch(requestUrl, {
+                method: "PUT",
+                headers: requestHeaders,
+                body: body
+              })];
+            case 1:
+              response = _p.sent();
+              if (response.status !== 200) {
+                // NOTE this may not be the right thing to check.
+                // Maybe different codes are okay
+                throw new Error("Response: ".concat(response.status));
+              }
+              if (!wait) {
+                return [2 /*return*/, response];
+              }
+              return [4 /*yield*/, response.text()];
+            case 2:
+              // The finished response seems to be empty
+              return [2 /*return*/, _p.sent()];
+          }
+        });
+      });
+    };
     return S3API;
   }();
-
-  var SearchAPI = /*#__PURE__*/function () {
+  var SearchAPI = /** @class */function () {
     function SearchAPI() {
-      _classCallCheck(this, SearchAPI);
-
       this.API_BASE = "https://archive.org/advancedsearch.php";
     }
-
-    _createClass(SearchAPI, [{
-      key: "get",
-      value: function get() {
-        var _ref13 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref13$q = _ref13.q,
-            q = _ref13$q === void 0 ? null : _ref13$q,
-            _ref13$page = _ref13.page,
-            page = _ref13$page === void 0 ? 1 : _ref13$page,
-            _ref13$fields = _ref13.fields,
-            fields = _ref13$fields === void 0 ? ["identifier"] : _ref13$fields,
-            options = _objectWithoutProperties(_ref13, ["q", "page", "fields"]);
-
-        var _this19 = this;
-
-        return Promise.resolve().then(function () {
-          if (!q) {
-            throw new Error("Missing required arg 'q'");
+    SearchAPI.prototype.get = function (_a) {
+      return __awaiter(this, void 0, void 0, function () {
+        var params, url;
+        var q = _a.q,
+          page = _a.page,
+          fields = _a.fields,
+          options = __rest(_a, ["q", "page", "fields"]);
+        return __generator(this, function (_b) {
+          if (_typeof(q) === "object") {
+            q = this.buildQueryFromObject(q);
           }
-
-          if (_typeof(q) == "object") {
-            q = _this19.buildQueryFromObject(q);
-          }
-
-          var reqParams = _objectSpread(_objectSpread({
+          params = new URLSearchParams(_assign(_assign({
             q: q,
-            page: page,
-            fl: fields
-          }, options), {}, {
+            page: String(page !== null && page !== void 0 ? page : 1),
+            fl: (fields !== null && fields !== void 0 ? fields : ["identifier"]).toString()
+          }, options), {
             output: "json"
-          });
-
-          var encodedParams = paramify(reqParams);
-          var url = "".concat(_this19.API_BASE, "?").concat(encodedParams);
-          return fetchJson(url);
+          }));
+          url = "".concat(this.API_BASE, "?").concat(params);
+          return [2 /*return*/, fetchJson(url)];
         });
-      }
-    }, {
-      key: "search",
-      value: function search(q) {
-        var _this20 = this;
-
-        return Promise.resolve().then(function () {
-          return _this20.get({
-            q: q
-          });
-        });
-      }
-    }, {
-      key: "buildQueryFromObject",
-      value: function buildQueryFromObject(qObject) {
-        // Map dictionary to a key=val search query
-        return Object.keys(qObject).map(function (key) {
-          if (Array.isArray(qObject[key])) {
-            return "".concat(key, ":( ").concat(qObject[key].map(function (v) {
-              return "\"".concat(v, "\"");
-            }).join(" OR "), " )");
-          } else {
-            return "".concat(key, ":\"").concat(qObject[key], "\"");
+      });
+    };
+    SearchAPI.prototype.search = function (q) {
+      return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              return [4 /*yield*/, this.get({
+                q: q
+              })];
+            case 1:
+              return [2 /*return*/, _a.sent()];
           }
-        }).join(" AND ");
-      }
-    }]);
-
+        });
+      });
+    };
+    SearchAPI.prototype.buildQueryFromObject = function (qObject) {
+      // Map dictionary to a key=val search query
+      return Object.keys(qObject).map(function (key) {
+        if (Array.isArray(qObject[key])) {
+          return "".concat(key, ":( ").concat(qObject[key].map(function (v) {
+            return "\"".concat(v, "\"");
+          }).join(" OR "), " )");
+        }
+        return "".concat(key, ":\"").concat(qObject[key], "\"");
+      }).join(" AND ");
+    };
     return SearchAPI;
   }();
-
-  var SearchTextAPI = function SearchTextAPI() {
-    _classCallCheck(this, SearchTextAPI);
-  };
-
-  var ViewsAPI = /*#__PURE__*/function () {
+  var SearchTextAPI = /** @class */function () {
+    function SearchTextAPI() {}
+    return SearchTextAPI;
+  }();
+  var ViewsAPI = /** @class */function () {
     function ViewsAPI() {
-      _classCallCheck(this, ViewsAPI);
-
       // https://be-api.us.archive.org/views/v1/short/<identifier>[,<identifier>,...]
       this.API_BASE = "https://be-api.us.archive.org/views/v1/short";
     }
-
-    _createClass(ViewsAPI, [{
-      key: "get",
-      value: function get() {
-        var _ref14 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref14$identifier = _ref14.identifier,
-            identifier = _ref14$identifier === void 0 ? null : _ref14$identifier;
-
-        var _this21 = this;
-
-        return Promise.resolve().then(function () {
-          identifier = Array.isArray(identifier) ? identifier.join(",") : identifier;
-          return fetchJson("".concat(_this21.API_BASE, "/").concat(identifier));
+    ViewsAPI.prototype.get = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var identifier = _b.identifier;
+        return __generator(this, function (_c) {
+          return [2 /*return*/, fetchJson("".concat(this.API_BASE, "/").concat(Array.isArray(identifier) ? identifier.join(",") : identifier))];
         });
-      }
-    }]);
-
+      });
+    };
     return ViewsAPI;
   }();
-
-  var WaybackAPI = /*#__PURE__*/function () {
+  var WaybackAPI = /** @class */function () {
     function WaybackAPI() {
-      _classCallCheck(this, WaybackAPI);
-
       this.AVAILABLE_API_BASE = "https://archive.org/wayback/available";
       this.CDX_API_BASE = corsWorkAround("https://web.archive.org/cdx/search/");
       this.SAVE_API_BASE = corsWorkAround("https://web.archive.org/save/");
@@ -877,210 +813,183 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     /**
      * @see https://archive.org/help/wayback_api.php
      */
-
-
-    _createClass(WaybackAPI, [{
-      key: "available",
-      value: function available() {
-        var _ref15 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref15$url = _ref15.url,
-            url = _ref15$url === void 0 ? null : _ref15$url,
-            _ref15$timestamp = _ref15.timestamp,
-            timestamp = _ref15$timestamp === void 0 ? null : _ref15$timestamp;
-
-        var _this22 = this;
-
-        return Promise.resolve().then(function () {
-          var params = {
-            url: url
-          };
-
-          if (timestamp !== null) {
-            params.timestamp = timestamp;
+    WaybackAPI.prototype.available = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var params, response;
+        var url = _b.url,
+          timestamp = _b.timestamp;
+        return __generator(this, function (_c) {
+          switch (_c.label) {
+            case 0:
+              params = new URLSearchParams({
+                url: url
+              });
+              if (timestamp != null) {
+                params.set("timestamp", timestamp);
+              }
+              return [4 /*yield*/, fetch("".concat(this.AVAILABLE_API_BASE, "?").concat(params))];
+            case 1:
+              response = _c.sent();
+              return [4 /*yield*/, response.json()];
+            case 2:
+              return [2 /*return*/, _c.sent()];
           }
-
-          var searchParams = paramify(params);
-          var fetchFunction = isInBrowser() ? fetchJsonp : fetch;
-          return fetchFunction("".concat(_this22.AVAILABLE_API_BASE, "?").concat(searchParams));
-        }).then(function (_resp) {
-          var response = _resp;
-          return response.json();
         });
-      }
-      /**
-       * @see https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server
-       */
-
-    }, {
-      key: "cdx",
-      value: function cdx() {
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        var _this23 = this;
-
-        return Promise.resolve().then(function () {
-          options.output = "json";
-          var searchParams = paramify(options);
-          return fetch("".concat(_this23.CDX_API_BASE, "?").concat(searchParams));
-        }).then(function (_resp) {
-          var response = _resp;
-          return response.text();
-        }).then(function (_resp) {
-          var raw = _resp;
-          var json;
-
-          try {
-            json = JSON.parse(raw);
-          } catch (e) {
-            json = {
-              error: raw.trim()
-            };
+      });
+    };
+    /**
+     * @see https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server
+     */
+    WaybackAPI.prototype.cdx = function (options) {
+      return __awaiter(this, void 0, void 0, function () {
+        var params, response, raw, json;
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              params = new URLSearchParams(_assign(_assign({}, options), {
+                output: "json"
+              }));
+              return [4 /*yield*/, fetch("".concat(this.CDX_API_BASE, "?").concat(params))];
+            case 1:
+              response = _a.sent();
+              return [4 /*yield*/, response.text()];
+            case 2:
+              raw = _a.sent();
+              try {
+                json = JSON.parse(raw);
+              } catch (e) {
+                json = {
+                  error: raw.trim()
+                };
+              }
+              return [2 /*return*/, json];
           }
-
-          return json;
         });
-      }
-      /**
-       * @see https://docs.google.com/document/d/1Nsv52MvSjbLb2PCpHlat0gkzw0EvtSgpKHu4mk0MnrA/edit
-       */
-
-    }, {
-      key: "savePageNow",
-      value: function savePageNow() {
-        var _ref16 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref16$url = _ref16.url,
-            url = _ref16$url === void 0 ? null : _ref16$url,
-            _ref16$captureOutlink = _ref16.captureOutlinks,
-            captureOutlinks = _ref16$captureOutlink === void 0 ? 0 : _ref16$captureOutlink,
-            _ref16$captureAll = _ref16.captureAll,
-            captureAll = _ref16$captureAll === void 0 ? true : _ref16$captureAll,
-            _ref16$captureScreens = _ref16.captureScreenshot,
-            captureScreenshot = _ref16$captureScreens === void 0 ? false : _ref16$captureScreens,
-            _ref16$skipFirstArchi = _ref16.skipFirstArchive,
-            skipFirstArchive = _ref16$skipFirstArchi === void 0 ? true : _ref16$skipFirstArchi,
-            _ref16$ifNotArchivedW = _ref16.ifNotArchivedWithin,
-            ifNotArchivedWithin = _ref16$ifNotArchivedW === void 0 ? null : _ref16$ifNotArchivedW,
-            _ref16$auth = _ref16.auth,
-            auth = _ref16$auth === void 0 ? newEmptyAuth() : _ref16$auth;
-
-        var _this24 = this;
-
-        return Promise.resolve().then(function () {
-          url = url.replace(/^https?\:\/\//, "");
-          var params = {
-            url: url,
-            capture_outlinks: captureOutlinks,
-            capture_all: captureAll ? "1" : "0",
-            capture_screenshot: captureScreenshot ? "1" : "0",
-            skip_first_archive: skipFirstArchive ? "1" : "0"
-          };
-
-          if (ifNotArchivedWithin) {
-            params.if_not_archived_within = ifNotArchivedWithin;
+      });
+    };
+    /**
+     * @see https://docs.google.com/document/d/1Nsv52MvSjbLb2PCpHlat0gkzw0EvtSgpKHu4mk0MnrA/edit
+     */
+    WaybackAPI.prototype.savePageNow = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var params, response;
+        var url = _b.url,
+          _c = _b.captureOutlinks,
+          captureOutlinks = _c === void 0 ? false : _c,
+          _d = _b.captureAll,
+          captureAll = _d === void 0 ? true : _d,
+          _e = _b.captureScreenshot,
+          captureScreenshot = _e === void 0 ? false : _e,
+          _f = _b.skipFirstArchive,
+          skipFirstArchive = _f === void 0 ? true : _f,
+          ifNotArchivedWithin = _b.ifNotArchivedWithin,
+          _g = _b.auth,
+          auth = _g === void 0 ? newEmptyAuth() : _g;
+        return __generator(this, function (_h) {
+          switch (_h.label) {
+            case 0:
+              params = new URLSearchParams({
+                url: url.replace(/^https?\:\/\//, ""),
+                capture_outlinks: captureOutlinks ? "1" : "0",
+                capture_screenshot: captureScreenshot ? "1" : "0",
+                capture_all: captureAll ? "1" : "0",
+                skip_first_archive: skipFirstArchive ? "1" : "0"
+              });
+              if (ifNotArchivedWithin) {
+                params.set("if_not_archived_within", String(ifNotArchivedWithin));
+              }
+              return [4 /*yield*/, fetch(this.SAVE_API_BASE, {
+                credentials: "omit",
+                method: "POST",
+                body: params,
+                headers: _assign({
+                  Accept: "application/json",
+                  "Content-Type": "application/x-www-form-urlencoded"
+                }, authToHeaderS3(auth))
+              })];
+            case 1:
+              response = _h.sent();
+              return [4 /*yield*/, response.json()];
+            case 2:
+              return [2 /*return*/, _h.sent()];
           }
-
-          return fetch(_this24.SAVE_API_BASE, {
-            credentials: "omit",
-            method: "POST",
-            body: paramify(params),
-            headers: _objectSpread({
-              Accept: "application/json",
-              "Content-Type": "application/x-www-form-urlencoded"
-            }, authToHeaderS3(auth))
-          });
-        }).then(function (_resp) {
-          var response = _resp;
-          return response.json();
         });
-      }
-    }]);
-
+      });
+    };
     return WaybackAPI;
   }();
-
-  var ZipFileAPI = /*#__PURE__*/function () {
-    function ZipFileAPI() {
-      _classCallCheck(this, ZipFileAPI);
-    }
-
-    _createClass(ZipFileAPI, [{
-      key: "ls",
-
-      /**
-       * List the contents of a zip file in an item
-       * Eg: https://archive.org/download/goodytwoshoes00newyiala/goodytwoshoes00newyiala_jp2.zip/
-       */
-      value: function ls(identifier, zipPath) {
-        var auth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : newEmptyAuth();
-        return Promise.resolve().then(function () {
-          if (!zipPath.match(/\.(7z|cbr|cbz|cdr|iso|rar|tar|zip)$/)) {
-            throw new Error("Invalid zip type");
-          }
-
-          var requestUrl = corsWorkAround("https://archive.org/download/".concat(identifier, "/").concat(enc(zipPath), "/"));
-          return fetch(requestUrl, {
-            headers: authToHeaderCookies(auth)
-          });
-        }).then(function (_resp) {
-          var response = _resp;
-
-          if (response.status != 200) {
-            throw Error({
-              error: "not found"
-            });
-          }
-
-          return response.text();
-        }).then(function (_resp) {
-          var html = _resp; // This page has <td>'s without closing el tags (took a while to
-          // figure this out). This breaks the DOMparser, so I added a workaround
-          // to add closing tags
-
-          var tableHtml = html.match(/(<table class="archext">[\w\W]*<\/table>)/g)[0];
-          tableHtml = tableHtml.replace(/(<td[^>]*>[\w\W]*?)(?=<(?:td|\/tr))/g, "$1</td>");
-          var table = new xmldom.DOMParser().parseFromString(tableHtml);
-          var rows = table.getElementsByTagName("tr");
-          var results = [];
-
-          var _loop = function _loop(i) {
-            var cells = rows.item(i).getElementsByTagName("td");
-
-            if (cells.length != 4) {
-              return "continue";
-            }
-
-            try {
-              var a = cells.item(0).getElementsByTagName("a").item(0);
-              results.push({
-                key: a.textContent,
-                href: "https:" + a.getAttribute("href"),
-                jpegUrl: function () {
-                  try {
-                    return "https:" + cells.item(1).getElementsByTagName("a").item(0).getAttribute("href");
-                  } catch (e) {
-                    return null;
+  var ZipFileAPI = /** @class */function () {
+    function ZipFileAPI() {}
+    /**
+     * List the contents of a zip file in an item
+     * Eg: https://archive.org/download/goodytwoshoes00newyiala/goodytwoshoes00newyiala_jp2.zip/
+     */
+    ZipFileAPI.prototype.ls = function (identifier_1, zipPath_1) {
+      return __awaiter(this, arguments, void 0, function (identifier, zipPath, auth) {
+        var requestUrl, response, html, tableHtml, match, table, rows, results, _loop_1, i;
+        var _a, _b, _c, _d, _e, _f, _g;
+        if (auth === void 0) {
+          auth = newEmptyAuth();
+        }
+        return __generator(this, function (_h) {
+          switch (_h.label) {
+            case 0:
+              if (!zipPath.match(/\.(7z|cbr|cbz|cdr|iso|rar|tar|zip)$/)) {
+                throw new Error("Invalid zip type");
+              }
+              requestUrl = corsWorkAround("https://archive.org/download/".concat(identifier, "/").concat(enc(zipPath), "/"));
+              return [4 /*yield*/, fetch(requestUrl, {
+                headers: authToHeaderCookies(auth)
+              })];
+            case 1:
+              response = _h.sent();
+              if (response.status !== 200) {
+                throw Error("not found");
+              }
+              return [4 /*yield*/, response.text()];
+            case 2:
+              html = _h.sent();
+              tableHtml = html;
+              match = html.match(/(<table class="archext">[\w\W]*<\/table>)/g);
+              if (match) {
+                tableHtml = match[0].replace(/(<td[^>]*>[\w\W]*?)(?=<(?:td|\/tr))/g, "$1</td>");
+              }
+              table = new xmldom.DOMParser().parseFromString(tableHtml);
+              rows = table.getElementsByTagName("tr");
+              results = [];
+              _loop_1 = function _loop_1(i) {
+                var cells = (_b = (_a = rows.item(i)) === null || _a === void 0 ? void 0 : _a.getElementsByTagName("td")) !== null && _b !== void 0 ? _b : new HTMLCollection();
+                if (cells.length !== 4) return "continue";
+                try {
+                  var a = (_c = cells.item(0)) === null || _c === void 0 ? void 0 : _c.getElementsByTagName("a").item(0);
+                  if (a) {
+                    results.push({
+                      key: a.textContent,
+                      href: "https:".concat(a.getAttribute("href")),
+                      jpegUrl: function () {
+                        var _a, _b;
+                        try {
+                          var href = (_b = (_a = cells.item(1)) === null || _a === void 0 ? void 0 : _a.getElementsByTagName("a").item(0)) === null || _b === void 0 ? void 0 : _b.getAttribute("href");
+                          if (href) return "https:".concat(href);
+                        } catch (_c) {}
+                        return null;
+                      }(),
+                      timestamp: (_e = (_d = cells.item(2)) === null || _d === void 0 ? void 0 : _d.textContent) !== null && _e !== void 0 ? _e : null,
+                      size: (_g = (_f = cells.item(3)) === null || _f === void 0 ? void 0 : _f.textContent) !== null && _g !== void 0 ? _g : null
+                    });
                   }
-                }(),
-                timestamp: cells.item(2).textContent,
-                size: cells.item(3).textContent
-              });
-            } catch (e) {}
-          };
-
-          for (var i = 0; i < rows.length; i++) {
-            var _ret = _loop(i);
-
-            if (_ret === "continue") continue;
+                } catch (e) {}
+              };
+              for (i = 0; i < rows.length; i++) {
+                _loop_1(i);
+              }
+              return [2 /*return*/, results];
           }
-
-          return results;
         });
-      }
-    }]);
-
+      });
+    };
     return ZipFileAPI;
   }();
-
   var iajs = {
     Auth: new Auth(),
     BookReaderAPI: new BookReaderAPI(),
