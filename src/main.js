@@ -1,10 +1,7 @@
-import fetch from "node-fetch";
-import fetchJsonp from "fetch-jsonp";
 import { DOMParser } from "xmldom";
 
 let CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
 
-const log = console.log;
 const enc = encodeURIComponent;
 const paramify = (obj) => new URLSearchParams(obj).toString();
 const str2arr = (v) => (Array.isArray(v) ? v : [v]);
@@ -420,8 +417,7 @@ class WaybackAPI {
       params.timestamp = timestamp;
     }
     const searchParams = paramify(params);
-    const fetchFunction = isInBrowser() ? fetchJsonp : fetch;
-    const response = await fetchFunction(
+    const response = await fetch(
       `${this.AVAILABLE_API_BASE}?${searchParams}`
     );
     return await response.json();
