@@ -4,8 +4,21 @@ import type { AuthData } from "./auth";
 const CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
 
 const enc = encodeURIComponent;
-const paramify = (obj: Record<string, string>) =>
-  new URLSearchParams(obj).toString();
+const paramify = (
+  obj: Record<string, string | string[] | number | number[] | undefined>,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+  for (const [key, val] of Object.entries(obj)) {
+    if (Array.isArray(val)) {
+      for (const value of val) {
+        params.append(key, String(value));
+      }
+    } else if (val != null) {
+      params.set(key, String(val));
+    }
+  }
+  return params;
+};
 const str2arr = (v: string | string[]) => (Array.isArray(v) ? v : [v]);
 
 const isInBrowser = () => {
@@ -192,14 +205,16 @@ class FavoritesAPI {
     } catch (e) {
       throw new Error(`Metadata lookup failed for: ${params.identifier}`);
     }
-    const sparams = new URLSearchParams({
-      ...params,
-      output: "json",
-    });
-    const response = await fetch(`${this.API_BASE}?${sparams}`, {
-      method: "POST",
-      headers: authToHeaderCookies(auth),
-    });
+    const response = await fetch(
+      `${this.API_BASE}?${paramify({
+        ...params,
+        output: "json",
+      })}`,
+      {
+        method: "POST",
+        headers: authToHeaderCookies(auth),
+      },
+    );
     return await response.json().catch((e) => {
       return { error: e };
     });
@@ -429,24 +444,27 @@ class SearchAPI {
 
   async get({
     q,
-    page,
-    fields,
+    page = 1,
+    fields = ["identify"],
+    sort,
     ...options
-  }: { q: SearchGetQuery; page?: number; fields?: string[] } & Record<
-    string,
-    unknown
-  >) {
+  }: {
+    q: SearchGetQuery;
+    page?: number;
+    fields?: string[];
+    sort?: string;
+  } & Record<string, unknown>) {
     if (typeof q === "object") {
       q = this.buildQueryFromObject(q);
     }
-    const params = new URLSearchParams({
+    const url = `${this.API_BASE}?${paramify({
       q,
-      page: String(page ?? 1),
-      fl: (fields ?? ["identifier"]).toString(),
+      page,
+      "fl[]": fields,
+      sort,
       ...options,
       output: "json",
-    });
-    const url = `${this.API_BASE}?${params}`;
+    })}`;
     return fetchJson(url);
   }
 
@@ -506,11 +524,9 @@ class WaybackAPI {
    * @see https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server
    */
   async cdx(options: Record<string, unknown>) {
-    const params = new URLSearchParams({
-      ...options,
-      output: "json",
-    });
-    const response = await fetch(`${this.CDX_API_BASE}?${params}`);
+    const response = await fetch(
+      `${this.CDX_API_BASE}?${paramify({ ...options, output: "json" })}`,
+    );
     const raw = await response.text();
     let json: unknown;
     try {
@@ -592,7 +608,11 @@ class ZipFileAPI {
    * List the contents of a zip file in an item
    * Eg: https://archive.org/download/goodytwoshoes00newyiala/goodytwoshoes00newyiala_jp2.zip/
    */
-  async ls(identifier, zipPath, auth = newEmptyAuth()) {
+  async ls(
+    identifier: string,
+    zipPath: string,
+    auth: AuthData = newEmptyAuth(),
+  ) {
     if (!zipPath.match(/\.(7z|cbr|cbz|cdr|iso|rar|tar|zip)$/)) {
       throw new Error("Invalid zip type");
     }
