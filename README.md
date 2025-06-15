@@ -62,7 +62,7 @@ node examples/node/03-reviews.js
 # and so on...
 ```
 
-## Planned features
+## Features
 
 This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs)! In the **iajs** list are features from the original project, and in the **iats** list are changes made since forking.
 
@@ -89,7 +89,7 @@ This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs)! In the **iajs**
 - Allow unquoted wildcard searches & keyless (any field) searches ([iajs#5](https://github.com/rchrd2/iajs/issues/5))
 
 **Planned**
-- [ ] OpenLibrary.org APIs
+- OpenLibrary.org APIs
 
 ## Misc
 
