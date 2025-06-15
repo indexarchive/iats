@@ -2,12 +2,6 @@
 
 **Internet Archive JavaScript Client which supports reading and writing data in NodeJS and the Browser**
 
-This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs) with the following changes:
-- Added TypeScript support
-  - Still pending: appropriate return types
-- Dropped `node-fetch` and `fetch-jsonp` dependencies (now uses global `fetch`)
-- Dropped `prettier` for `@biomejs/biome`
-
 The Internet Archive is a non-profit open platform for archiving the world's free websites, books, movies, software, music, and more.
 
 This JavaScript library enables reading and writing to the Internet Archive APIs in NodeJS **and** in the browser. To learn more about the Internet Archive visit <https://archive.org/about/>.
@@ -70,35 +64,34 @@ node examples/node/03-reviews.js
 
 ## Planned features
 
-- ✅ Read item metadata and list of files (Metadata API)
-- ✅ Update item metadata (Metadata API)
-- ✅ Search (Search API)
-- ✅ Search gifcities.org (GifCities API)
-- ✅ Query related item API (Related Items API)
-- ✅ Sign in with user/pass (Xauthn API)
-- ✅ Sign in with s3 tokens
-- ✅ Sign in from archive.org session cookies
-- ✅ Add reviews (Reviews API)
-- ✅ Add page to Wayback (Save Page Now API)
-- ✅ Query the Wayback Machine (CDX and Available APIs)
-- ✅ Add/remove/list favorites (bookmarks.php API)
-- ✅ Create items (S3 API)
-- ✅ Upload item files (S3 API)
-- OpenLibrary.org APIs
-- BookReaderJSIA aka manifest API
-- Book IIIF API
-- TV
-- Radio
-- List reviews by user
-- Generate embed codes for books/videos/music files in item
-- Include a JSON diff library
-- more tbd
+This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs)! In the **iajs** list are features from the original project, and in the **iats** list are changes made since forking.
 
+**iajs**
+- Read item metadata and list of files (Metadata API)
+- Update item metadata (Metadata API)
+- Search (Search API)
+- Search gifcities.org (GifCities API)
+- Query related item API (Related Items API)
+- Sign in with user/pass (Xauthn API)
+- Sign in with s3 tokens
+- Sign in from archive.org session cookies
+- Add reviews (Reviews API)
+- Add page to Wayback (Save Page Now API)
+- Query the Wayback Machine (CDX and Available APIs)
+- Add/remove/list favorites (bookmarks.php API)
+- Create items (S3 API)
+- Upload item files (S3 API)
+
+**iats**
+- TypeScript
+  - Still pending: appropriate return types
+- Dropped `node-fetch` and `fetch-jsonp` dependencies (now uses global `fetch`), dropped `prettier` for `@biomejs/biome`
+- Allow unquoted wildcard searches & keyless (any field) searches ([iajs#5](https://github.com/rchrd2/iajs/issues/5))
+
+**Planned**
+- [ ] OpenLibrary.org APIs
 
 ## Misc
-
-Note:
-I wanted to build this while I worked at Internet Archive, but did not have the bandwidth. Now I'm working on this in my free time.
 
 See Also:
 

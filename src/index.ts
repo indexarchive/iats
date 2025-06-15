@@ -474,12 +474,18 @@ class SearchAPI {
 
   buildQueryFromObject(qObject: Record<string, unknown>) {
     // Map dictionary to a key=val search query
-    return Object.keys(qObject)
-      .map((key) => {
-        if (Array.isArray(qObject[key])) {
-          return `${key}:( ${qObject[key].map((v) => `"${v}"`).join(" OR ")} )`;
+    return Object.entries(qObject)
+      .map(([key, value]) => {
+        // allow any-field search by omitting prefix
+        const prefix = key === "" ? "" : `${key}:`;
+        if (Array.isArray(value)) {
+          return `${prefix}( ${value.map((v) => `"${v}"`).join(" OR ")} )`;
         }
-        return `${key}:"${qObject[key]}"`;
+        // allow wildcard search
+        if (value === "*") {
+          return `${prefix}*`;
+        }
+        return `${prefix}"${value}"`;
       })
       .join(" AND ");
   }
