@@ -1,7 +1,7 @@
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 (function (global, factory) {
-  (typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('xmldom')) : typeof define === 'function' && define.amd ? define(['xmldom'], factory) : (global = global || self, global.ia = factory(global.xmldom));
-})(this, function (xmldom) {
+  (typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? factory(exports, require('xmldom')) : typeof define === 'function' && define.amd ? define(['exports', 'xmldom'], factory) : (global = global || self, factory(global.ia = {}, global.xmldom));
+})(this, function (exports, xmldom) {
   'use strict';
 
   /******************************************************************************
@@ -149,23 +149,39 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
   };
-  var CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
-  var enc = encodeURIComponent;
-  var paramify = function paramify(obj) {
-    return new URLSearchParams(obj).toString();
-  };
-  var str2arr = function str2arr(v) {
-    return Array.isArray(v) ? v : [v];
-  };
   var isInBrowser = function isInBrowser() {
     return !(typeof window === "undefined");
   };
+  // instance of lib/cors-proxy.js
+  var CORS_PROXY = "https://iajs-cors.rchrd2.workers.dev";
   var corsWorkAround = function corsWorkAround(url) {
     if (isInBrowser()) {
       return "".concat(CORS_PROXY, "/").concat(url);
     }
     return url;
   };
+  var enc = encodeURIComponent;
+  var paramify = function paramify(obj) {
+    var params = new URLSearchParams();
+    for (var _i = 0, _a = Object.entries(obj); _i < _a.length; _i++) {
+      var _b = _a[_i],
+        key = _b[0],
+        val = _b[1];
+      if (Array.isArray(val)) {
+        for (var _c = 0, val_1 = val; _c < val_1.length; _c++) {
+          var value = val_1[_c];
+          params.append(key, String(value));
+        }
+      } else if (val != null) {
+        params.set(key, String(val));
+      }
+    }
+    return params;
+  };
+  var str2arr = function str2arr(v) {
+    return Array.isArray(v) ? v : [v];
+  };
+  // biome-ignore lint/suspicious/noExplicitAny:
   var fetchJson = function fetchJson(url, options) {
     return __awaiter(void 0, void 0, void 0, function () {
       var res;
@@ -329,6 +345,91 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     function BookReaderAPI() {}
     return BookReaderAPI;
   }();
+  var GifcitiesAPI = /** @class */function () {
+    function GifcitiesAPI() {
+      this.API_BASE = "https://gifcities.archive.org/api/v1/gifsearch";
+    }
+    GifcitiesAPI.prototype.get = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var q = _b.q;
+        return __generator(this, function (_c) {
+          if (!q) return [2 /*return*/, []];
+          return [2 /*return*/, fetchJson("".concat(this.API_BASE, "?").concat(new URLSearchParams({
+            q: q
+          })))];
+        });
+      });
+    };
+    GifcitiesAPI.prototype.search = function (q) {
+      return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+          return [2 /*return*/, this.get({
+            q: q
+          })];
+        });
+      });
+    };
+    return GifcitiesAPI;
+  }();
+  var MetadataAPI = /** @class */function () {
+    function MetadataAPI() {
+      this.READ_API_BASE = "https://archive.org/metadata";
+      this.WRITE_API_BASE = corsWorkAround("https://archive.org/metadata");
+    }
+    MetadataAPI.prototype.get = function (options) {
+      return __awaiter(this, void 0, void 0, function () {
+        var identifier, path, _a, auth, url;
+        return __generator(this, function (_b) {
+          identifier = options.identifier, path = options.path, _a = options.auth, auth = _a === void 0 ? newEmptyAuth() : _a;
+          url = "".concat(this.READ_API_BASE, "/").concat(identifier);
+          if (path) url = "".concat(url, "/").concat(path);
+          return [2 /*return*/, fetchJson(url, {
+            headers: authToHeaderS3(auth)
+          })];
+        });
+      });
+    };
+    MetadataAPI.prototype.patch = function (_a) {
+      return __awaiter(this, arguments, void 0, function (_b) {
+        var body, url, response;
+        var identifier = _b.identifier,
+          _c = _b.target,
+          target = _c === void 0 ? "metadata" : _c,
+          _d = _b.priority,
+          priority = _d === void 0 ? -5 : _d,
+          _e = _b.patch,
+          patch = _e === void 0 ? {} : _e,
+          _f = _b.auth,
+          auth = _f === void 0 ? newEmptyAuth() : _f;
+        return __generator(this, function (_g) {
+          switch (_g.label) {
+            case 0:
+              body = new URLSearchParams({
+                "-target": target,
+                "-patch": JSON.stringify(patch),
+                priority: String(priority)
+              });
+              if (auth.values.s3.secret) body.set("secret", auth.values.s3.secret);
+              if (auth.values.s3.access) body.set("access", auth.values.s3.access);
+              url = "".concat(this.WRITE_API_BASE, "/").concat(identifier);
+              return [4 /*yield*/, fetch(url, {
+                method: "POST",
+                body: body,
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded"
+                }
+              })];
+            case 1:
+              response = _g.sent();
+              return [4 /*yield*/, response.json()];
+            case 2:
+              return [2 /*return*/, _g.sent()];
+          }
+        });
+      });
+    };
+    return MetadataAPI;
+  }();
   var FavoritesAPI = /** @class */function () {
     function FavoritesAPI() {
       this.API_BASE = corsWorkAround("https://archive.org/bookmarks.php");
@@ -399,14 +500,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     };
     FavoritesAPI.prototype.modify = function (params, auth) {
       return __awaiter(this, void 0, void 0, function () {
-        var mdResponse, e_2, sparams, response;
+        var mdResponse, e_1, response;
         return __generator(this, function (_a) {
           switch (_a.label) {
             case 0:
               _a.trys.push([0, 2,, 3]);
-              return [4 /*yield*/, iajs.MetadataAPI.get({
+              return [4 /*yield*/, new MetadataAPI().get({
                 identifier: params.identifier,
-                path: "/metadata"
+                path: "metadata"
               })];
             case 1:
               mdResponse = _a.sent();
@@ -414,13 +515,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               params.mediatype = mdResponse.result.mediatype;
               return [3 /*break*/, 3];
             case 2:
-              e_2 = _a.sent();
+              e_1 = _a.sent();
               throw new Error("Metadata lookup failed for: ".concat(params.identifier));
             case 3:
-              sparams = new URLSearchParams(_assign(_assign({}, params), {
+              return [4 /*yield*/, fetch("".concat(this.API_BASE, "?").concat(paramify(_assign(_assign({}, params), {
                 output: "json"
-              }));
-              return [4 /*yield*/, fetch("".concat(this.API_BASE, "?").concat(sparams), {
+              }))), {
                 method: "POST",
                 headers: authToHeaderCookies(auth)
               })];
@@ -438,93 +538,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       });
     };
     return FavoritesAPI;
-  }();
-  var GifcitiesAPI = /** @class */function () {
-    function GifcitiesAPI() {
-      this.API_BASE = "https://gifcities.archive.org/api/v1/gifsearch";
-    }
-    GifcitiesAPI.prototype.get = function () {
-      return __awaiter(this, arguments, void 0, function (_a) {
-        var _b = _a === void 0 ? {} : _a,
-          q = _b.q;
-        return __generator(this, function (_c) {
-          if (q == null) return [2 /*return*/, []];
-          return [2 /*return*/, fetchJson("".concat(this.API_BASE, "?").concat(new URLSearchParams({
-            q: q
-          })))];
-        });
-      });
-    };
-    GifcitiesAPI.prototype.search = function (q) {
-      return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-          return [2 /*return*/, this.get({
-            q: q
-          })];
-        });
-      });
-    };
-    return GifcitiesAPI;
-  }();
-  var MetadataAPI = /** @class */function () {
-    function MetadataAPI() {
-      this.READ_API_BASE = "https://archive.org/metadata";
-      this.WRITE_API_BASE = corsWorkAround("https://archive.org/metadata");
-    }
-    MetadataAPI.prototype.get = function (_a) {
-      return __awaiter(this, arguments, void 0, function (_b) {
-        var identifier = _b.identifier,
-          _c = _b.path,
-          path = _c === void 0 ? "" : _c,
-          _d = _b.auth,
-          auth = _d === void 0 ? newEmptyAuth() : _d;
-        return __generator(this, function (_e) {
-          return [2 /*return*/, fetchJson("".concat(this.READ_API_BASE, "/").concat(identifier, "/").concat(path), {
-            headers: authToHeaderS3(auth)
-          })];
-        });
-      });
-    };
-    MetadataAPI.prototype.patch = function (_a) {
-      return __awaiter(this, arguments, void 0, function (_b) {
-        var body, url, response;
-        var identifier = _b.identifier,
-          _c = _b.target,
-          target = _c === void 0 ? "metadata" : _c,
-          _d = _b.priority,
-          priority = _d === void 0 ? -5 : _d,
-          _e = _b.patch,
-          patch = _e === void 0 ? {} : _e,
-          _f = _b.auth,
-          auth = _f === void 0 ? newEmptyAuth() : _f;
-        return __generator(this, function (_g) {
-          switch (_g.label) {
-            case 0:
-              body = new URLSearchParams({
-                "-target": target,
-                "-patch": JSON.stringify(patch),
-                priority: String(priority)
-              });
-              if (auth.values.s3.secret) body.set("secret", auth.values.s3.secret);
-              if (auth.values.s3.access) body.set("access", auth.values.s3.access);
-              url = "".concat(this.WRITE_API_BASE, "/").concat(identifier);
-              return [4 /*yield*/, fetch(url, {
-                method: "POST",
-                body: body,
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded"
-                }
-              })];
-            case 1:
-              response = _g.sent();
-              return [4 /*yield*/, response.json()];
-            case 2:
-              return [2 /*return*/, _g.sent()];
-          }
-        });
-      });
-    };
-    return MetadataAPI;
   }();
   var RelatedAPI = /** @class */function () {
     function RelatedAPI() {
@@ -596,6 +609,94 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       });
     };
     return ReviewsAPI;
+  }();
+  var SearchAPI = /** @class */function () {
+    function SearchAPI() {
+      this.API_BASE = "https://archive.org/advancedsearch.php";
+    }
+    SearchAPI.prototype.get = function (options) {
+      return __awaiter(this, void 0, void 0, function () {
+        var q, _a, page, _b, fields, sort, rest, url;
+        return __generator(this, function (_c) {
+          q = options.q, _a = options.page, page = _a === void 0 ? 1 : _a, _b = options.fields, fields = _b === void 0 ? ["identifier"] : _b, sort = options.sort, rest = __rest(options, ["q", "page", "fields", "sort"]);
+          if (_typeof(q) === "object") {
+            q = this.buildQueryFromObject(q);
+          }
+          url = "".concat(this.API_BASE, "?").concat(paramify(_assign(_assign({
+            q: q,
+            page: page,
+            "fl[]": fields,
+            sort: sort
+          }, rest), {
+            output: "json"
+          })));
+          return [2 /*return*/, fetchJson(url)];
+        });
+      });
+    };
+    SearchAPI.prototype.search = function (q) {
+      return this.get({
+        q: q
+      });
+    };
+    /**
+     * convert an object representing a query to a string for the advanced
+     * search API.
+     * @see https://archive.org/advancedsearch.php
+     * @param query keys in an object are joined by "AND", whereas items in an
+     * array are joined with "OR". If any inner value is not a string, it will
+     * be converted.
+     * ```js
+     * buildQueryFromObject({ title: "foo", subject: ["educational", "sports"] })
+     * // result:
+     * // title:"foo" AND ( subject:"educational" OR subject:"sports" )
+     * ```
+     *
+     * Values enclosed in parentheses will not be quoted, since this indicates a
+     * vague or "contains" match:
+     * ```js
+     * buildQueryFromObject({ title: "(bar)", subject: ["educational", "(baz)"] })
+     * // result:
+     * // title:(bar) AND ( subject:"educational" OR subject:(baz) )
+     * ```
+     * Values equalling `*` or those enclosed in double quotes or square brackets
+     * will also not be modified.
+     *
+     * Blank keys will be given no prefix to match the "any field" behavior:
+     * ```js
+     * buildQueryFromObject({ "": "(fuzzy)", subject: "cat" })
+     * // result:
+     * // (fuzzy) AND subject:"cat"
+     * ```
+     * @returns compiled string
+     */
+    SearchAPI.prototype.buildQueryFromObject = function (query) {
+      var wrapValue = function wrapValue(value) {
+        var val = String(value);
+        if (val.startsWith("(") && val.endsWith(")") || val.startsWith("\"") && val.endsWith("\"") || val.startsWith("[") && val.endsWith("]") || val === "*") {
+          return val;
+        }
+        return "\"".concat(val, "\"");
+      };
+      return Object.entries(query).map(function (_a) {
+        var key = _a[0],
+          value = _a[1];
+        // allow any-field search by omitting prefix
+        var prefix = key === "" ? "" : "".concat(key, ":");
+        if (Array.isArray(value)) {
+          return "".concat(prefix, "( ").concat(value.map(function (v) {
+            return wrapValue(v);
+          }).join(" OR "), " )");
+        }
+        // allow the user to quote or parenthesize their own values
+        return "".concat(prefix).concat(wrapValue(value));
+      }).join(" AND ");
+    };
+    return SearchAPI;
+  }();
+  var SearchTextAPI = /** @class */function () {
+    function SearchTextAPI() {}
+    return SearchTextAPI;
   }();
   var S3API = /** @class */function () {
     function S3API() {
@@ -731,64 +832,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     };
     return S3API;
   }();
-  var SearchAPI = /** @class */function () {
-    function SearchAPI() {
-      this.API_BASE = "https://archive.org/advancedsearch.php";
-    }
-    SearchAPI.prototype.get = function (_a) {
-      return __awaiter(this, void 0, void 0, function () {
-        var params, url;
-        var q = _a.q,
-          page = _a.page,
-          fields = _a.fields,
-          options = __rest(_a, ["q", "page", "fields"]);
-        return __generator(this, function (_b) {
-          if (_typeof(q) === "object") {
-            q = this.buildQueryFromObject(q);
-          }
-          params = new URLSearchParams(_assign(_assign({
-            q: q,
-            page: String(page !== null && page !== void 0 ? page : 1),
-            fl: (fields !== null && fields !== void 0 ? fields : ["identifier"]).toString()
-          }, options), {
-            output: "json"
-          }));
-          url = "".concat(this.API_BASE, "?").concat(params);
-          return [2 /*return*/, fetchJson(url)];
-        });
-      });
-    };
-    SearchAPI.prototype.search = function (q) {
-      return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-          switch (_a.label) {
-            case 0:
-              return [4 /*yield*/, this.get({
-                q: q
-              })];
-            case 1:
-              return [2 /*return*/, _a.sent()];
-          }
-        });
-      });
-    };
-    SearchAPI.prototype.buildQueryFromObject = function (qObject) {
-      // Map dictionary to a key=val search query
-      return Object.keys(qObject).map(function (key) {
-        if (Array.isArray(qObject[key])) {
-          return "".concat(key, ":( ").concat(qObject[key].map(function (v) {
-            return "\"".concat(v, "\"");
-          }).join(" OR "), " )");
-        }
-        return "".concat(key, ":\"").concat(qObject[key], "\"");
-      }).join(" AND ");
-    };
-    return SearchAPI;
-  }();
-  var SearchTextAPI = /** @class */function () {
-    function SearchTextAPI() {}
-    return SearchTextAPI;
-  }();
   var ViewsAPI = /** @class */function () {
     function ViewsAPI() {
       // https://be-api.us.archive.org/views/v1/short/<identifier>[,<identifier>,...]
@@ -842,14 +885,13 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
      */
     WaybackAPI.prototype.cdx = function (options) {
       return __awaiter(this, void 0, void 0, function () {
-        var params, response, raw, json;
+        var response, raw, json;
         return __generator(this, function (_a) {
           switch (_a.label) {
             case 0:
-              params = new URLSearchParams(_assign(_assign({}, options), {
+              return [4 /*yield*/, fetch("".concat(this.CDX_API_BASE, "?").concat(paramify(_assign(_assign({}, options), {
                 output: "json"
-              }));
-              return [4 /*yield*/, fetch("".concat(this.CDX_API_BASE, "?").concat(params))];
+              }))))];
             case 1:
               response = _a.sent();
               return [4 /*yield*/, response.text()];
@@ -954,7 +996,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               if (match) {
                 tableHtml = match[0].replace(/(<td[^>]*>[\w\W]*?)(?=<(?:td|\/tr))/g, "$1</td>");
               }
-              table = new xmldom.DOMParser().parseFromString(tableHtml);
+              table = new xmldom.DOMParser().parseFromString(tableHtml, "text/html");
               rows = table.getElementsByTagName("tr");
               results = [];
               _loop_1 = function _loop_1(i) {
@@ -990,7 +1032,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     };
     return ZipFileAPI;
   }();
-  var iajs = {
+  var ia = {
     Auth: new Auth(),
     BookReaderAPI: new BookReaderAPI(),
     GifcitiesAPI: new GifcitiesAPI(),
@@ -1005,5 +1047,21 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     WaybackAPI: new WaybackAPI(),
     ZipFileAPI: new ZipFileAPI()
   };
-  return iajs;
+  exports.Auth = Auth;
+  exports.BookReaderAPI = BookReaderAPI;
+  exports.FavoritesAPI = FavoritesAPI;
+  exports.GifcitiesAPI = GifcitiesAPI;
+  exports.MetadataAPI = MetadataAPI;
+  exports.RelatedAPI = RelatedAPI;
+  exports.ReviewsAPI = ReviewsAPI;
+  exports.S3API = S3API;
+  exports.SearchAPI = SearchAPI;
+  exports.SearchTextAPI = SearchTextAPI;
+  exports.ViewsAPI = ViewsAPI;
+  exports.WaybackAPI = WaybackAPI;
+  exports.ZipFileAPI = ZipFileAPI;
+  exports["default"] = ia;
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
 });
