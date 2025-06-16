@@ -84,12 +84,30 @@ This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs)! In the **iajs**
 
 **iats**
 - TypeScript
-  - Still pending: appropriate return types
+  - Most functions should have acceptably typed signatures. Below is the status of implementing return types for the various APIs.
+  - [x] Auth
+  - [ ] ~~BookReaderAPI~~ N/A, no content
+  - [ ] FavoritesAPI
+  - [ ] GifcitiesAPI
+  - [x] MetadataAPI
+  - [ ] RelatedAPI
+  - [ ] ReviewsAPI
+  - [ ] S3API
+  - [x] SearchAPI
+  - [ ] ~~SearchTextAPI~~ N/A, no content
+  - [ ] ViewsAPI
+  - [ ] WaybackAPI
+  - [ ] ZipFileAPI
 - Dropped `node-fetch` and `fetch-jsonp` dependencies (now uses global `fetch`), dropped `prettier` for `@biomejs/biome`
 - Allow unquoted wildcard searches & keyless (any field) searches ([iajs#5](https://github.com/rchrd2/iajs/issues/5))
+- Renamed default export to `ia` to match examples
 
 **Planned**
 - OpenLibrary.org APIs
+
+## Contribute
+
+PRs welcome! Before opening your request, just run `yarn build` to make sure your code can be rolled up for all supported platforms.
 
 ## Misc
 

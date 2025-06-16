@@ -10,7 +10,7 @@ import {
 export class Auth {
   XAUTH_BASE = corsWorkAround("https://archive.org/services/xauthn/");
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<AuthData> {
     try {
       const fetchOptions = {
         method: "POST",
@@ -35,7 +35,7 @@ export class Auth {
     access: string,
     secret: string,
     newAuth: AuthData = newEmptyAuth(),
-  ) {
+  ): Promise<AuthData> {
     newAuth.success = 1;
     newAuth.values.s3.access = access;
     newAuth.values.s3.secret = secret;
@@ -54,7 +54,7 @@ export class Auth {
     loggedInSig: string,
     loggedInUser: string,
     newAuth: AuthData = newEmptyAuth(),
-  ) {
+  ): Promise<AuthData> {
     newAuth.values.cookies["logged-in-sig"] = loggedInSig;
     newAuth.values.cookies["logged-in-user"] = loggedInUser;
     const s3response = await fetch(
