@@ -1,6 +1,6 @@
 import { DOMParser } from "xmldom";
 import { corsWorkAround } from "./cors";
-import { type AuthData, newEmptyAuth, enc, authToHeaderCookies } from "./http";
+import { type AuthData, authToHeaderCookies, enc, newEmptyAuth } from "./http";
 
 export class ZipFileAPI {
   /**

@@ -1,4 +1,4 @@
-import { newEmptyAuth, type AuthData, str2arr, authToHeaderS3 } from "./http";
+import { type AuthData, authToHeaderS3, newEmptyAuth, str2arr } from "./http";
 
 export class S3API {
   API_BASE = "https://s3.us.archive.org";

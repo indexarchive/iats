@@ -1,5 +1,5 @@
 import { corsWorkAround } from "./cors";
-import { fetchJson, newEmptyAuth, authToHeaderS3 } from "./http";
+import { authToHeaderS3, fetchJson, newEmptyAuth } from "./http";
 
 export class ReviewsAPI {
   WRITE_API_BASE = corsWorkAround(

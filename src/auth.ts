@@ -1,10 +1,10 @@
 import { corsWorkAround } from "./cors";
 import {
-  newEmptyAuth,
   type AuthData,
-  fetchJson,
-  authToHeaderS3,
   authToHeaderCookies,
+  authToHeaderS3,
+  fetchJson,
+  newEmptyAuth,
 } from "./http";
 
 export class Auth {

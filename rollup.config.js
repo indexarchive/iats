@@ -1,12 +1,11 @@
 import babel, { getBabelOutputPlugin } from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
-import typescript from "@rollup/plugin-typescript";
 import pkg from "./package.json";
 
 function browser(name) {
   return {
-    input: "src/index.ts",
+    input: "dist/index.js",
     external: ["xmldom"],
     output: [
       {
@@ -22,7 +21,6 @@ function browser(name) {
       },
     ],
     plugins: [
-      typescript(),
       resolve(),
       commonjs(),
       babel({
@@ -35,7 +33,7 @@ function browser(name) {
 
 function modern(name) {
   return {
-    input: "src/index.ts",
+    input: "dist/index.js",
     external: ["xmldom"],
     output: [
       {
@@ -61,7 +59,7 @@ function modern(name) {
         ],
       },
     ],
-    plugins: [typescript(), resolve(), commonjs()],
+    plugins: [resolve(), commonjs()],
   };
 }
 
@@ -70,12 +68,9 @@ export default [
   browser("examples/web/ia.browser.js"),
   modern("dist/ia.modern.js"),
   {
-    input: "src/index.ts",
+    input: "dist/index.js",
     external: [],
-    output: [
-      { file: pkg.cjs, format: "cjs" },
-      { file: pkg.module, format: "es" },
-    ],
-    plugins: [typescript(), commonjs()],
+    output: { file: pkg.module, format: "es" },
+    plugins: [commonjs()],
   },
 ];

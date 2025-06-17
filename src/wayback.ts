@@ -1,5 +1,5 @@
 import { corsWorkAround } from "./cors";
-import { paramify, newEmptyAuth, type AuthData, authToHeaderS3 } from "./http";
+import { type AuthData, authToHeaderS3, newEmptyAuth, paramify } from "./http";
 
 export class WaybackAPI {
   AVAILABLE_API_BASE = "https://archive.org/wayback/available";

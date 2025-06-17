@@ -6,7 +6,7 @@ The Internet Archive is a non-profit open platform for archiving the world's fre
 
 This JavaScript library enables reading and writing to the Internet Archive APIs in NodeJS **and** in the browser. To learn more about the Internet Archive visit <https://archive.org/about/>.
 
-It's lightweight with very little dependencies.
+It's lightweight with very few dependencies (only `xmldom`).
 
 The major APIs are documented here <https://archive.org/services/docs/api/index.html>, but this library supports additional APIs to enable more functionality. It does not abstract much from the APIs, but rather aggregates access to them all in a single multi-purpose library.
 

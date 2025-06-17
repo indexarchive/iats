@@ -1,11 +1,11 @@
 import { corsWorkAround } from "./cors";
 import {
-  newEmptyAuth,
   type AuthData,
+  authToHeaderCookies,
   fetchJson,
+  newEmptyAuth,
   paramify,
   str2arr,
-  authToHeaderCookies,
 } from "./http";
 import { MetadataAPI } from "./metadata";
 

@@ -65,7 +65,7 @@ export const authToHeaderCookies = (auth: AuthData) => {
   ) {
     let cookieStr = `logged-in-sig=${auth.values.cookies["logged-in-sig"]};`;
     cookieStr += ` logged-in-user=${auth.values.cookies["logged-in-user"]}`;
-    const headers = { Cookie: cookieStr };
+    const headers: Record<string, string> = { Cookie: cookieStr };
     if (isInBrowser()) {
       headers["X-Cookie-Cors"] = cookieStr;
     }
