@@ -95,12 +95,16 @@ This is a fork of [rchrd2/iajs](https://github.com/rchrd2/iajs)! In the **iajs**
   - [ ] S3API
   - [x] SearchAPI
   - [ ] ~~SearchTextAPI~~ N/A, no content
+  - [x] ServicesAPI
   - [ ] ViewsAPI
   - [ ] WaybackAPI
   - [ ] ZipFileAPI
 - Dropped `node-fetch` and `fetch-jsonp` dependencies (now uses global `fetch`), dropped `prettier` for `@biomejs/biome`
 - Allow unquoted wildcard searches & keyless (any field) searches ([iajs#5](https://github.com/rchrd2/iajs/issues/5))
 - Renamed default export to `ia` to match examples
+- Introduced new `ServicesAPI` for `/services` routes
+  - This API currently works a little differently than the rest. When a bad response is encountered, instead of returning the data, it will throw an `ArchiveError`. The error has `status` and `message` props, and you can access the unprocessed response body (parsed if JSON) in `error.data`.
+  - As a result, returned data from `ServiceAPI` functions can be handled more cleanly with less boilerplate as long as you have a reliable error handler.
 
 **Planned**
 - OpenLibrary.org APIs

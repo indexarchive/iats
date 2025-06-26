@@ -1,4 +1,5 @@
 import { isInBrowser } from "./cors";
+import { ArchiveError } from "./errors";
 
 export const enc = encodeURIComponent;
 
@@ -24,12 +25,19 @@ export const str2arr = (v: string | string[]) => (Array.isArray(v) ? v : [v]);
 export const fetchJson = async <T = any>(
   url: string,
   options?: RequestInit,
+  throwIfBad = false,
 ): Promise<T> => {
   const res = await fetch(
     url,
     options ? { method: "GET", ...options } : { method: "GET" },
   );
-  return (await res.json()) as T;
+  const data = (await res.json()) as T;
+  // biome-ignore lint/suspicious/noExplicitAny: some APIs might not work this way
+  if (throwIfBad && (!res.ok || (data as any).success === false)) {
+    throw new ArchiveError(options.method ?? "GET", res, data);
+  }
+
+  return data;
 };
 
 export interface AuthData {

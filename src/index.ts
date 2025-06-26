@@ -8,13 +8,14 @@ import { ReviewsAPI } from "./reviews";
 import { S3API } from "./s3";
 import { SearchAPI } from "./search";
 import { SearchTextAPI } from "./searchtext";
+import { ServicesAPI } from "./services";
 import { ViewsAPI } from "./views";
 import { WaybackAPI } from "./wayback";
 import { ZipFileAPI } from "./zip";
 
 import { type AuthData as AuthData_, newEmptyAuth, paramify } from "./http";
-import * as metadataTypes from "./types/metadata";
-import * as searchTypes from "./types/search";
+import * as types from "./types";
+import * as errors from "./errors";
 
 const ia = {
   Auth: new Auth(),
@@ -26,6 +27,7 @@ const ia = {
   ReviewsAPI: new ReviewsAPI(),
   SearchAPI: new SearchAPI(),
   SearchTextAPI: new SearchTextAPI(),
+  ServicesAPI: new ServicesAPI(),
   S3API: new S3API(),
   ViewsAPI: new ViewsAPI(),
   WaybackAPI: new WaybackAPI(),
@@ -42,8 +44,8 @@ namespace ia {
 // doing this instead of `export default`:
 export = {
   ...ia,
-  ...metadataTypes,
-  ...searchTypes,
+  ...types,
+  ...errors,
   newEmptyAuth,
   paramify,
 };

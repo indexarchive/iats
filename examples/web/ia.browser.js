@@ -36,6 +36,53 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
   unwrapExports(cors);
   var cors_1 = cors.corsWorkAround;
   var cors_2 = cors.isInBrowser;
+  var errors = createCommonjsModule(function (module, exports) {
+    var __extends = commonjsGlobal && commonjsGlobal.__extends || function () {
+      var _extendStatics = function extendStatics(d, b) {
+        _extendStatics = Object.setPrototypeOf || {
+          __proto__: []
+        } instanceof Array && function (d, b) {
+          d.__proto__ = b;
+        } || function (d, b) {
+          for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+        };
+        return _extendStatics(d, b);
+      };
+      return function (d, b) {
+        if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        _extendStatics(d, b);
+        function __() {
+          this.constructor = d;
+        }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+      };
+    }();
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.ArchiveError = void 0;
+    var ArchiveError = /** @class */function (_super) {
+      __extends(ArchiveError, _super);
+      function ArchiveError(method, response,
+      // we don't currently type all of our responses including their
+      // possible errors, but we should
+      // biome-ignore lint/suspicious/noExplicitAny: ^
+      data) {
+        var _a;
+        var _this = _super.call(this) || this;
+        _this.method = method;
+        _this.data = data;
+        _this.status = response.status;
+        _this.url = response.url;
+        _this.message = typeof data.value === "string" ? data.value : typeof data.error === "string" ? data.error : (_a = data.message) !== null && _a !== void 0 ? _a : "";
+        return _this;
+      }
+      return ArchiveError;
+    }(Error);
+    exports.ArchiveError = ArchiveError;
+  });
+  unwrapExports(errors);
+  var errors_1 = errors.ArchiveError;
   var http = createCommonjsModule(function (module, exports) {
     var __assign = commonjsGlobal && commonjsGlobal.__assign || function () {
       __assign = Object.assign || function (t) {
@@ -158,6 +205,15 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         };
       }
     };
+    var __spreadArray = commonjsGlobal && commonjsGlobal.__spreadArray || function (to, from, pack) {
+      if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+          if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+          ar[i] = from[i];
+        }
+      }
+      return to.concat(ar || Array.prototype.slice.call(from));
+    };
     Object.defineProperty(exports, "__esModule", {
       value: true
     });
@@ -186,11 +242,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     };
     exports.str2arr = str2arr;
     // biome-ignore lint/suspicious/noExplicitAny:
-    var fetchJson = function fetchJson(url, options) {
-      return __awaiter(void 0, void 0, void 0, function () {
-        var res;
-        return __generator(this, function (_a) {
-          switch (_a.label) {
+    var fetchJson = function fetchJson(url_1, options_1) {
+      var args_1 = [];
+      for (var _i = 2; _i < arguments.length; _i++) {
+        args_1[_i - 2] = arguments[_i];
+      }
+      return __awaiter(void 0, __spreadArray([url_1, options_1], args_1, true), void 0, function (url, options, throwIfBad) {
+        var res, data;
+        var _a;
+        if (throwIfBad === void 0) {
+          throwIfBad = false;
+        }
+        return __generator(this, function (_b) {
+          switch (_b.label) {
             case 0:
               return [4 /*yield*/, fetch(url, options ? __assign({
                 method: "GET"
@@ -198,10 +262,15 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 method: "GET"
               })];
             case 1:
-              res = _a.sent();
+              res = _b.sent();
               return [4 /*yield*/, res.json()];
             case 2:
-              return [2 /*return*/, _a.sent()];
+              data = _b.sent();
+              // biome-ignore lint/suspicious/noExplicitAny: some APIs might not work this way
+              if (throwIfBad && (!res.ok || data.success === false)) {
+                throw new errors.ArchiveError((_a = options.method) !== null && _a !== void 0 ? _a : "GET", res, data);
+              }
+              return [2 /*return*/, data];
           }
         });
       });
@@ -1875,6 +1944,301 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
   });
   unwrapExports(searchtext);
   var searchtext_1 = searchtext.SearchTextAPI;
+  var services = createCommonjsModule(function (module, exports) {
+    var __assign = commonjsGlobal && commonjsGlobal.__assign || function () {
+      __assign = Object.assign || function (t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+          s = arguments[i];
+          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+      };
+      return __assign.apply(this, arguments);
+    };
+    var __awaiter = commonjsGlobal && commonjsGlobal.__awaiter || function (thisArg, _arguments, P, generator) {
+      function adopt(value) {
+        return value instanceof P ? value : new P(function (resolve) {
+          resolve(value);
+        });
+      }
+      return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+          try {
+            step(generator.next(value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        function rejected(value) {
+          try {
+            step(generator["throw"](value));
+          } catch (e) {
+            reject(e);
+          }
+        }
+        function step(result) {
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+      });
+    };
+    var __generator = commonjsGlobal && commonjsGlobal.__generator || function (thisArg, body) {
+      var _ = {
+          label: 0,
+          sent: function sent() {
+            if (t[0] & 1) throw t[1];
+            return t[1];
+          },
+          trys: [],
+          ops: []
+        },
+        f,
+        y,
+        t,
+        g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+      return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+        return this;
+      }), g;
+      function verb(n) {
+        return function (v) {
+          return step([n, v]);
+        };
+      }
+      function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+          if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+          if (y = 0, t) op = [op[0] & 2, t.value];
+          switch (op[0]) {
+            case 0:
+            case 1:
+              t = op;
+              break;
+            case 4:
+              _.label++;
+              return {
+                value: op[1],
+                done: false
+              };
+            case 5:
+              _.label++;
+              y = op[1];
+              op = [0];
+              continue;
+            case 7:
+              op = _.ops.pop();
+              _.trys.pop();
+              continue;
+            default:
+              if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                _ = 0;
+                continue;
+              }
+              if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                _.label = op[1];
+                break;
+              }
+              if (op[0] === 6 && _.label < t[1]) {
+                _.label = t[1];
+                t = op;
+                break;
+              }
+              if (t && _.label < t[2]) {
+                _.label = t[2];
+                _.ops.push(op);
+                break;
+              }
+              if (t[2]) _.ops.pop();
+              _.trys.pop();
+              continue;
+          }
+          op = body.call(thisArg, _);
+        } catch (e) {
+          op = [6, e];
+          y = 0;
+        } finally {
+          f = t = 0;
+        }
+        if (op[0] & 5) throw op[1];
+        return {
+          value: op[0] ? op[1] : void 0,
+          done: true
+        };
+      }
+    };
+    var __rest = commonjsGlobal && commonjsGlobal.__rest || function (s, e) {
+      var t = {};
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+      if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+      }
+      return t;
+    };
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.ServicesAPI = void 0;
+    var ServicesAPI = /** @class */function () {
+      function ServicesAPI() {
+        this.READ_API_BASE = "https://archive.org/services";
+        this.WRITE_API_BASE = (0, cors.corsWorkAround)("https://archive.org/services");
+      }
+      ServicesAPI.prototype.getLists = function () {
+        return __awaiter(this, arguments, void 0, function (options) {
+          var _a, user, item, _b, auth, base, params, url, data;
+          if (options === void 0) {
+            options = {};
+          }
+          return __generator(this, function (_c) {
+            switch (_c.label) {
+              case 0:
+                _a = options.user, user = _a === void 0 ? "me" : _a, item = options.item, _b = options.auth, auth = _b === void 0 ? (0, http.newEmptyAuth)() : _b;
+                base = "".concat(this.READ_API_BASE, "/users/").concat(user, "/lists");
+                params = new URLSearchParams();
+                if (item) params.set("item", item);
+                url = "".concat(base, "?").concat(params);
+                return [4 /*yield*/, (0, http.fetchJson)(url, {
+                  headers: (0, http.authToHeaderCookies)(auth)
+                }, true)];
+              case 1:
+                data = _c.sent();
+                return [2 /*return*/, data.value];
+            }
+          });
+        });
+      };
+      /**
+       * Get a single list on the account.
+       * @param options options for the request.
+       * - `user`: the user itemname to query. defaults to `me` (the current user).
+       * - `listId`: ID of the list
+       * - `auth`: authentication data. cookies are required to access private
+       *   lists.
+       * @returns the requested list
+       */
+      ServicesAPI.prototype.getList = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+          var _a, user, listId, auth, url, data;
+          return __generator(this, function (_b) {
+            switch (_b.label) {
+              case 0:
+                _a = options.user, user = _a === void 0 ? "me" : _a, listId = options.listId, auth = options.auth;
+                url = "".concat(this.WRITE_API_BASE, "/users/").concat(user, "/lists/").concat(listId);
+                return [4 /*yield*/, (0, http.fetchJson)(url, {
+                  headers: (0, http.authToHeaderCookies)(auth)
+                }, true)];
+              case 1:
+                data = _b.sent();
+                return [2 /*return*/, data.value];
+            }
+          });
+        });
+      };
+      /**
+       * Modify list details.
+       * @param options options for the request.
+       * - `user`: the user itemname to query. defaults to `me` (the current user).
+       * - `listId`: ID of the list to modify
+       * - `name`: new name for the list
+       * - `description`: new description for the list (set to empty string to
+       *   clear)
+       * - `private`: whether the list should be private
+       * - `auth`: authentication data. cookies are required to access private
+       *   lists.
+       * @returns
+       */
+      ServicesAPI.prototype.modifyList = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+          var _a, user, listId, auth, body, url, response, data;
+          return __generator(this, function (_b) {
+            switch (_b.label) {
+              case 0:
+                _a = options.user, user = _a === void 0 ? "me" : _a, listId = options.listId, auth = options.auth, body = __rest(options, ["user", "listId", "auth"]);
+                url = "".concat(this.WRITE_API_BASE, "/users/").concat(user, "/lists/").concat(listId);
+                return [4 /*yield*/, fetch(url, {
+                  method: "PATCH",
+                  body: JSON.stringify({
+                    list_name: body.name,
+                    description: body.description,
+                    is_private: body["private"]
+                  }),
+                  headers: __assign({
+                    "Content-Type": "application/json"
+                  }, (0, http.authToHeaderCookies)(auth))
+                })];
+              case 1:
+                response = _b.sent();
+                return [4 /*yield*/, response.json()];
+              case 2:
+                data = _b.sent();
+                if (!data.success || !response.ok) {
+                  throw new errors.ArchiveError("PATCH", response, data);
+                }
+                return [2 /*return*/, data.value];
+            }
+          });
+        });
+      };
+      /**
+       * Add a member to a list.
+       * @param options options for the request.
+       * - `user`: the user itemname to query. defaults to `me` (the current user).
+       * - `listId`: ID of the list
+       * - `identifier`: the identifier of the item to add. this can be a member
+       *   already present in the list or even an identifier that does not exist.
+       *   in both cases, a new member will be created.
+       * - `auth`: authentication data. cookies are required to access private
+       *   lists.
+       * @returns the created list member
+       */
+      ServicesAPI.prototype.addToList = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+          var _a, user, listId, identifier, auth, url, response, data;
+          return __generator(this, function (_b) {
+            switch (_b.label) {
+              case 0:
+                _a = options.user, user = _a === void 0 ? "me" : _a, listId = options.listId, identifier = options.identifier, auth = options.auth;
+                url = "".concat(this.WRITE_API_BASE, "/users/").concat(user, "/lists/").concat(listId, "/members");
+                return [4 /*yield*/, fetch(url, {
+                  method: "POST",
+                  body: JSON.stringify({
+                    identifier: identifier
+                  }),
+                  headers: __assign({
+                    "Content-Type": "application/json"
+                  }, (0, http.authToHeaderCookies)(auth))
+                })];
+              case 1:
+                response = _b.sent();
+                return [4 /*yield*/, response.json()];
+              case 2:
+                data = _b.sent();
+                if (!data.success || !response.ok) {
+                  throw new errors.ArchiveError("POST", response, data);
+                }
+                return [2 /*return*/, data.value];
+            }
+          });
+        });
+      };
+      /**
+       * Returns a URL to a low resolution (180w) thumbnail for the item. For most
+       * items, the content will be the `__ia_thumb.jpg` file. For users, it will
+       * be their avatar. If a thumbnail cannot be determined, the image will be a
+       * generic placeholder with the archive.org logo (or it may redirect to
+       * `/images/notfound.png`).
+       * @param identifier the identifier for the item
+       * @returns the constructed URL
+       */
+      ServicesAPI.prototype.getItemImageUrl = function (identifier) {
+        return "".concat(this.READ_API_BASE, "/img/").concat(identifier);
+      };
+      return ServicesAPI;
+    }();
+    exports.ServicesAPI = ServicesAPI;
+  });
+  unwrapExports(services);
+  var services_1 = services.ServicesAPI;
   var views = createCommonjsModule(function (module, exports) {
     var __awaiter = commonjsGlobal && commonjsGlobal.__awaiter || function (thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -2457,6 +2821,40 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     });
   });
   unwrapExports(search$1);
+  var services$1 = createCommonjsModule(function (module, exports) {
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+  });
+  unwrapExports(services$1);
+  var types = createCommonjsModule(function (module, exports) {
+    var __createBinding = commonjsGlobal && commonjsGlobal.__createBinding || (Object.create ? function (o, m, k, k2) {
+      if (k2 === undefined) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = {
+          enumerable: true,
+          get: function get() {
+            return m[k];
+          }
+        };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function (o, m, k, k2) {
+      if (k2 === undefined) k2 = k;
+      o[k2] = m[k];
+    });
+    var __exportStar = commonjsGlobal && commonjsGlobal.__exportStar || function (m, exports) {
+      for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+    };
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    __exportStar(metadata$1, exports);
+    __exportStar(search$1, exports);
+    __exportStar(services$1, exports);
+  });
+  unwrapExports(types);
   var __assign = commonjsGlobal && commonjsGlobal.__assign || function () {
     __assign = Object.assign || function (t) {
       for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -2477,12 +2875,13 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     ReviewsAPI: new reviews.ReviewsAPI(),
     SearchAPI: new search.SearchAPI(),
     SearchTextAPI: new searchtext.SearchTextAPI(),
+    ServicesAPI: new services.ServicesAPI(),
     S3API: new s3.S3API(),
     ViewsAPI: new views.ViewsAPI(),
     WaybackAPI: new wayback.WaybackAPI(),
     ZipFileAPI: new zip.ZipFileAPI()
   };
-  var dist = __assign(__assign(__assign(__assign({}, ia), metadata$1), search$1), {
+  var dist = __assign(__assign(__assign(__assign({}, ia), types), errors), {
     newEmptyAuth: http.newEmptyAuth,
     paramify: http.paramify
   });
