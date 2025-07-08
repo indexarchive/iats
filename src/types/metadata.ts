@@ -81,6 +81,7 @@ export interface MetadataAPIItem {
     date?: string;
     description: string;
     director?: string;
+    publisher?: string;
     actor?: string[];
     creator?: string | string[];
     distributor?: string[];
@@ -103,7 +104,7 @@ export interface MetadataAPIItem {
     collection: string[];
     rights: string;
   };
-  reviews: MetadataAPIReview[];
+  reviews?: MetadataAPIReview[];
   server: string;
   /** A unique(?) pseudo-random ID for the item */
   uniq: number;
