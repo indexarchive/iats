@@ -73,7 +73,7 @@ export class ZipFileAPI {
             size: cells.item(3)?.textContent ?? null,
           });
         }
-      } catch (e) {}
+      } catch {}
     }
     return results;
   }

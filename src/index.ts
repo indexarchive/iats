@@ -1,7 +1,9 @@
 import { Auth } from "./auth";
 import { BookReaderAPI } from "./bookreader";
+import * as errors from "./errors";
 import { FavoritesAPI } from "./favorites";
 import { GifcitiesAPI } from "./gifcities";
+import { type AuthData as AuthData_, newEmptyAuth, paramify } from "./http";
 import { MetadataAPI } from "./metadata";
 import { RelatedAPI } from "./related";
 import { ReviewsAPI } from "./reviews";
@@ -9,14 +11,13 @@ import { S3API } from "./s3";
 import { SearchAPI } from "./search";
 import { SearchTextAPI } from "./searchtext";
 import { ServicesAPI } from "./services";
+import * as types from "./types";
 import { ViewsAPI } from "./views";
 import { WaybackAPI } from "./wayback";
 import { ZipFileAPI } from "./zip";
 
-import * as errors from "./errors";
-import { type AuthData as AuthData_, newEmptyAuth, paramify } from "./http";
-import * as types from "./types";
-
+// it's not unused, I think the namespace is confusing the linter?
+// biome-ignore lint/correctness/noUnusedVariables: ^
 const ia = {
   Auth: new Auth(),
   BookReaderAPI: new BookReaderAPI(),

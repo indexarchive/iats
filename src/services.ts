@@ -38,11 +38,7 @@ export class ServicesAPI {
     auth?: AuthData;
   }): Promise<ServicesAPIUserListWithItem[]>;
   async getLists<T extends string | undefined>(
-    options: {
-      user?: string;
-      item?: T;
-      auth?: AuthData;
-    } = {},
+    options: { user?: string; item?: T; auth?: AuthData } = {},
   ): Promise<
     T extends string ? ServicesAPIUserListWithItem[] : ServicesAPIUserList[]
   > {

@@ -8,7 +8,12 @@ export class S3API {
     if (!identifier) {
       throw new Error("Missing required args");
     }
-    return await (await fetch(`${this.API_BASE}/${identifier}`)).text();
+    return await (
+      await fetch(`${this.API_BASE}/${identifier}`, {
+        method: "GET",
+        headers: authToHeaderS3(auth),
+      })
+    ).text();
   }
 
   async createEmptyItem({

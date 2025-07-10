@@ -21,7 +21,11 @@
     "type": "git",
     "url": "git+https://github.com/shayypy/iats.git"
   },
-  "keywords": ["Internet", "Archive", "Client"],
+  "keywords": [
+    "Internet",
+    "Archive",
+    "Client"
+  ],
   "author": "Richard Caceres, shay (shayypy)",
   "license": "MIT",
   "bugs": {
@@ -34,7 +38,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "2.0.6",
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-commonjs": "^11.0.1",
     "@rollup/plugin-node-resolve": "^7.0.0",
@@ -44,5 +48,7 @@
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }

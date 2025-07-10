@@ -63,7 +63,7 @@ export class FavoritesAPI {
       });
       params.title = str2arr(mdResponse.result.title).join(", ");
       params.mediatype = mdResponse.result.mediatype;
-    } catch (e) {
+    } catch {
       throw new Error(`Metadata lookup failed for: ${params.identifier}`);
     }
     const response = await fetch(

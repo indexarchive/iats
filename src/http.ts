@@ -21,7 +21,7 @@ export const paramify = (
 
 export const str2arr = (v: string | string[]) => (Array.isArray(v) ? v : [v]);
 
-// biome-ignore lint/suspicious/noExplicitAny:
+// biome-ignore lint/suspicious/noExplicitAny: maybe could be unknown? todo
 export const fetchJson = async <T = any>(
   url: string,
   options?: RequestInit,

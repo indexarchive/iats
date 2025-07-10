@@ -25,7 +25,7 @@ export class Auth {
         data.values = { ...data.values, ...newEmptyAuth().values };
       }
       return data;
-    } catch (e) {
+    } catch {
       // TODO figure out syntax for catching error response
       return newEmptyAuth();
     }

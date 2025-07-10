@@ -12,7 +12,10 @@ export class WaybackAPI {
   async available({
     url,
     timestamp,
-  }: { url: string; timestamp?: string | null }) {
+  }: {
+    url: string;
+    timestamp?: string | null;
+  }) {
     const params = new URLSearchParams({ url });
     if (timestamp != null) {
       params.set("timestamp", timestamp);
@@ -32,7 +35,7 @@ export class WaybackAPI {
     let json: unknown;
     try {
       json = JSON.parse(raw);
-    } catch (e) {
+    } catch {
       json = { error: raw.trim() };
     }
     return json;
@@ -81,7 +84,7 @@ export class WaybackAPI {
     auth?: AuthData;
   }) {
     const params = new URLSearchParams({
-      url: url.replace(/^https?\:\/\//, ""),
+      url: url.replace(/^https?:\/\//, ""),
       capture_outlinks: captureOutlinks ? "1" : "0",
       capture_screenshot: captureScreenshot ? "1" : "0",
       capture_all: captureAll ? "1" : "0",
