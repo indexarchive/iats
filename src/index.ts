@@ -13,9 +13,9 @@ import { ViewsAPI } from "./views";
 import { WaybackAPI } from "./wayback";
 import { ZipFileAPI } from "./zip";
 
+import * as errors from "./errors";
 import { type AuthData as AuthData_, newEmptyAuth, paramify } from "./http";
 import * as types from "./types";
-import * as errors from "./errors";
 
 const ia = {
   Auth: new Auth(),

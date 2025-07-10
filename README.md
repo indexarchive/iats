@@ -16,7 +16,7 @@ This library contains enough functionality to create powerful experiments and ne
 
 Through npm
 ```
-npm i git+https://github.com/shayypy/iats.git
+npm i git+https://github.com/indexarchive/iats.git
 ```
 
 ~~Load from CDN in browser~~
@@ -27,7 +27,7 @@ This package is not currently published on NPM! The outdated browser examples be
 
 ## Live demos
 
-<https://rchrd2.github.io/iajs/examples/web/01.html>
+<https://indexarchive.github.io/iats/examples/web/01.html>
 
 
 ## Usage Examples
