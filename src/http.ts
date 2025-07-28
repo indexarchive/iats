@@ -23,7 +23,7 @@ export const str2arr = (v: string | string[]) => (Array.isArray(v) ? v : [v]);
 
 // biome-ignore lint/suspicious/noExplicitAny: maybe could be unknown? todo
 export const fetchJson = async <T = any>(
-  url: string,
+  url: string | URL,
   options?: RequestInit,
   throwIfBad = false,
 ): Promise<T> => {

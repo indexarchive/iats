@@ -43,11 +43,10 @@ export class ServicesAPI {
     T extends string ? ServicesAPIUserListWithItem[] : ServicesAPIUserList[]
   > {
     const { user = "me", item, auth = newEmptyAuth() } = options;
-    const base = `${this.READ_API_BASE}/users/${user}/lists`;
-    const params = new URLSearchParams();
-    if (item) params.set("item", item);
 
-    const url = `${base}?${params}`;
+    const url = new URL(`${this.READ_API_BASE}/users/${user}/lists`);
+    if (item) url.searchParams.set("item", item);
+
     const data = await fetchJson(
       url,
       { headers: authToHeaderCookies(auth) },
