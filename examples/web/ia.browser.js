@@ -241,7 +241,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       return Array.isArray(v) ? v : [v];
     };
     exports.str2arr = str2arr;
-    // biome-ignore lint/suspicious/noExplicitAny:
+    // biome-ignore lint/suspicious/noExplicitAny: maybe could be unknown? todo
     var fetchJson = function fetchJson(url_1, options_1) {
       var args_1 = [];
       for (var _i = 2; _i < arguments.length; _i++) {
@@ -460,11 +460,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       }
       Auth.prototype.login = function (email, password) {
         return __awaiter(this, void 0, void 0, function () {
-          var fetchOptions, response, data, e_1;
-          return __generator(this, function (_a) {
-            switch (_a.label) {
+          var fetchOptions, response, data, _a;
+          return __generator(this, function (_b) {
+            switch (_b.label) {
               case 0:
-                _a.trys.push([0, 3,, 4]);
+                _b.trys.push([0, 3,, 4]);
                 fetchOptions = {
                   method: "POST",
                   body: new URLSearchParams({
@@ -477,16 +477,16 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 };
                 return [4 /*yield*/, fetch("".concat(this.XAUTH_BASE, "?op=login"), fetchOptions)];
               case 1:
-                response = _a.sent();
+                response = _b.sent();
                 return [4 /*yield*/, response.json()];
               case 2:
-                data = _a.sent();
+                data = _b.sent();
                 if (!data.success) {
                   data.values = __assign(__assign({}, data.values), (0, http.newEmptyAuth)().values);
                 }
                 return [2 /*return*/, data];
               case 3:
-                e_1 = _a.sent();
+                _a = _b.sent();
                 // TODO figure out syntax for catching error response
                 return [2 /*return*/, (0, http.newEmptyAuth)()];
               case 4:
@@ -945,22 +945,22 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       };
       FavoritesAPI.prototype.modify = function (params, auth) {
         return __awaiter(this, void 0, void 0, function () {
-          var mdResponse, e_1, response;
-          return __generator(this, function (_a) {
-            switch (_a.label) {
+          var mdResponse, _a, response;
+          return __generator(this, function (_b) {
+            switch (_b.label) {
               case 0:
-                _a.trys.push([0, 2,, 3]);
+                _b.trys.push([0, 2,, 3]);
                 return [4 /*yield*/, new metadata.MetadataAPI().get({
                   identifier: params.identifier,
                   path: "metadata"
                 })];
               case 1:
-                mdResponse = _a.sent();
+                mdResponse = _b.sent();
                 params.title = (0, http.str2arr)(mdResponse.result.title).join(", ");
                 params.mediatype = mdResponse.result.mediatype;
                 return [3 /*break*/, 3];
               case 2:
-                e_1 = _a.sent();
+                _a = _b.sent();
                 throw new Error("Metadata lookup failed for: ".concat(params.identifier));
               case 3:
                 return [4 /*yield*/, fetch("".concat(this.API_BASE, "?").concat((0, http.paramify)(__assign(__assign({}, params), {
@@ -970,14 +970,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   headers: (0, http.authToHeaderCookies)(auth)
                 })];
               case 4:
-                response = _a.sent();
+                response = _b.sent();
                 return [4 /*yield*/, response.json()["catch"](function (e) {
                   return {
                     error: e
                   };
                 })];
               case 5:
-                return [2 /*return*/, _a.sent()];
+                return [2 /*return*/, _b.sent()];
             }
           });
         });
@@ -1589,7 +1589,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 if (!identifier) {
                   throw new Error("Missing required args");
                 }
-                return [4 /*yield*/, fetch("".concat(this.API_BASE, "/").concat(identifier))];
+                return [4 /*yield*/, fetch("".concat(this.API_BASE, "/").concat(identifier), {
+                  method: "GET",
+                  headers: (0, http.authToHeaderS3)(auth)
+                })];
               case 1:
                 return [4 /*yield*/, _e.sent().text()];
               case 2:
@@ -2085,7 +2088,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       }
       ServicesAPI.prototype.getLists = function () {
         return __awaiter(this, arguments, void 0, function (options) {
-          var _a, user, item, _b, auth, base, params, url, data;
+          var _a, user, item, _b, auth, url, data;
           if (options === void 0) {
             options = {};
           }
@@ -2093,10 +2096,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             switch (_c.label) {
               case 0:
                 _a = options.user, user = _a === void 0 ? "me" : _a, item = options.item, _b = options.auth, auth = _b === void 0 ? (0, http.newEmptyAuth)() : _b;
-                base = "".concat(this.READ_API_BASE, "/users/").concat(user, "/lists");
-                params = new URLSearchParams();
-                if (item) params.set("item", item);
-                url = "".concat(base, "?").concat(params);
+                url = new URL("".concat(this.READ_API_BASE, "/users/").concat(user, "/lists"));
+                if (item) url.searchParams.set("item", item);
                 return [4 /*yield*/, (0, http.fetchJson)(url, {
                   headers: (0, http.authToHeaderCookies)(auth)
                 }, true)];
@@ -2239,6 +2240,52 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
   });
   unwrapExports(services);
   var services_1 = services.ServicesAPI;
+  var metadata$1 = createCommonjsModule(function (module, exports) {
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+  });
+  unwrapExports(metadata$1);
+  var search$1 = createCommonjsModule(function (module, exports) {
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+  });
+  unwrapExports(search$1);
+  var services$1 = createCommonjsModule(function (module, exports) {
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+  });
+  unwrapExports(services$1);
+  var types = createCommonjsModule(function (module, exports) {
+    var __createBinding = commonjsGlobal && commonjsGlobal.__createBinding || (Object.create ? function (o, m, k, k2) {
+      if (k2 === undefined) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = {
+          enumerable: true,
+          get: function get() {
+            return m[k];
+          }
+        };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function (o, m, k, k2) {
+      if (k2 === undefined) k2 = k;
+      o[k2] = m[k];
+    });
+    var __exportStar = commonjsGlobal && commonjsGlobal.__exportStar || function (m, exports) {
+      for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+    };
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    __exportStar(metadata$1, exports);
+    __exportStar(search$1, exports);
+    __exportStar(services$1, exports);
+  });
+  unwrapExports(types);
   var views = createCommonjsModule(function (module, exports) {
     var __awaiter = commonjsGlobal && commonjsGlobal.__awaiter || function (thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -2552,7 +2599,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 raw = _a.sent();
                 try {
                   json = JSON.parse(raw);
-                } catch (e) {
+                } catch (_b) {
                   json = {
                     error: raw.trim()
                   };
@@ -2584,7 +2631,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             switch (_h.label) {
               case 0:
                 params = new URLSearchParams({
-                  url: url.replace(/^https?\:\/\//, ""),
+                  url: url.replace(/^https?:\/\//, ""),
                   capture_outlinks: captureOutlinks ? "1" : "0",
                   capture_screenshot: captureScreenshot ? "1" : "0",
                   capture_all: captureAll ? "1" : "0",
@@ -2793,7 +2840,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                         size: (_g = (_f = cells.item(3)) === null || _f === void 0 ? void 0 : _f.textContent) !== null && _g !== void 0 ? _g : null
                       });
                     }
-                  } catch (e) {}
+                  } catch (_j) {}
                 };
                 for (i = 0; i < rows.length; i++) {
                   _loop_1(i);
@@ -2809,52 +2856,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
   });
   unwrapExports(zip);
   var zip_1 = zip.ZipFileAPI;
-  var metadata$1 = createCommonjsModule(function (module, exports) {
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-  });
-  unwrapExports(metadata$1);
-  var search$1 = createCommonjsModule(function (module, exports) {
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-  });
-  unwrapExports(search$1);
-  var services$1 = createCommonjsModule(function (module, exports) {
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-  });
-  unwrapExports(services$1);
-  var types = createCommonjsModule(function (module, exports) {
-    var __createBinding = commonjsGlobal && commonjsGlobal.__createBinding || (Object.create ? function (o, m, k, k2) {
-      if (k2 === undefined) k2 = k;
-      var desc = Object.getOwnPropertyDescriptor(m, k);
-      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-        desc = {
-          enumerable: true,
-          get: function get() {
-            return m[k];
-          }
-        };
-      }
-      Object.defineProperty(o, k2, desc);
-    } : function (o, m, k, k2) {
-      if (k2 === undefined) k2 = k;
-      o[k2] = m[k];
-    });
-    var __exportStar = commonjsGlobal && commonjsGlobal.__exportStar || function (m, exports) {
-      for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-    };
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    __exportStar(metadata$1, exports);
-    __exportStar(search$1, exports);
-    __exportStar(services$1, exports);
-  });
-  unwrapExports(types);
   var __assign = commonjsGlobal && commonjsGlobal.__assign || function () {
     __assign = Object.assign || function (t) {
       for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -2865,6 +2866,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     };
     return __assign.apply(this, arguments);
   };
+
+  // it's not unused, I think the namespace is confusing the linter?
+  // biome-ignore lint/correctness/noUnusedVariables: ^
   var ia = {
     Auth: new auth.Auth(),
     BookReaderAPI: new bookreader.BookReaderAPI(),
