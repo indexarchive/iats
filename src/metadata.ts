@@ -67,7 +67,7 @@ export class MetadataAPI {
     const url = `${this.WRITE_API_BASE}/${identifier}`;
     const response = await fetch(url, {
       method: "POST",
-      body,
+      body: body.toString(),
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },

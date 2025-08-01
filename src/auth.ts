@@ -14,7 +14,7 @@ export class Auth {
     try {
       const fetchOptions = {
         method: "POST",
-        body: new URLSearchParams({ email, password }),
+        body: new URLSearchParams({ email, password }).toString(),
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },

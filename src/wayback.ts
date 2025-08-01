@@ -96,7 +96,7 @@ export class WaybackAPI {
     const response = await fetch(this.SAVE_API_BASE, {
       credentials: "omit",
       method: "POST",
-      body: params,
+      body: params.toString(),
       headers: {
         Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",
