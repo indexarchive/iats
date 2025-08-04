@@ -20,6 +20,9 @@ export class ArchiveError extends Error {
         ? data.value
         : typeof data.error === "string"
           ? data.error
-          : (data.message ?? "");
+          : // services/search/beta
+            typeof data.response?.error?.message === "string"
+            ? data.response.error.message
+            : (data.message ?? "");
   }
 }

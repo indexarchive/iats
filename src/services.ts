@@ -7,6 +7,8 @@ import {
   newEmptyAuth,
 } from "./http";
 import type {
+  ServicesAPIBetaSearchBody,
+  ServicesAPIGetBetaSearch,
   ServicesAPIGetUserListResponse,
   ServicesAPIUserList,
   ServicesAPIUserListItem,
@@ -171,5 +173,70 @@ export class ServicesAPI {
    */
   getItemImageUrl(identifier: string): string {
     return `${this.READ_API_BASE}/img/${identifier}`;
+  }
+
+  /**
+   * Use the beta search service endpoint. The `SearchAPI` interface should be
+   * preferred, both because of its developer-friendliness and because it is
+   * properly documented.
+   *
+   * This endpoint does not return exclusively items. Hits are discriminated
+   * by `hit_type`.
+   * @param options options for the request.
+   * - `query`: a query to include in the search, by default, for e.g.
+   *   collections, all items in the collection will be returned.
+   * - `pageType`: the type of page to search (like `collection_details`)
+   * - `pageTarget`: the target of the specified page type (e.g. the
+   *   collection identifier).
+   * - `hits`: the number of hits to return in the response (default 100)
+   * - `page`: page number (1-indexed) (default 1)
+   * - `aggregations`: unknown
+   * - `uid`: unknown
+   * - `clientUrl`: the qualified URL that this request may have originated
+   *   from
+   * - `auth`: authentication data
+   * @returns an object containing `hits` (search results) and some other
+   * useful data
+   */
+  async betaSearch(options: {
+    query?: string;
+    pageType: string;
+    pageTarget: string;
+    hits?: number;
+    page?: number;
+    aggregations?: boolean;
+    uid?: string;
+    clientUrl?: string;
+    auth?: AuthData;
+  }): Promise<ServicesAPIBetaSearchBody> {
+    const {
+      query = "",
+      pageType: page_type,
+      pageTarget: page_target,
+      hits = 100,
+      page = 1,
+      aggregations = false,
+      uid,
+      clientUrl,
+      auth = newEmptyAuth(),
+    } = options;
+
+    const params = new URLSearchParams({
+      user_query: query,
+      page_type,
+      page_target,
+      hits_per_page: String(hits),
+      page: String(page),
+      aggregations: String(aggregations),
+    });
+    if (uid) params.set("uid", uid);
+    if (clientUrl) params.set("client_url", clientUrl);
+
+    const url = `${this.READ_API_BASE}/search/beta/page_production/?${params}`;
+    const data = await fetchJson<ServicesAPIGetBetaSearch>(
+      url,
+      authToHeaderCookies(auth),
+    );
+    return data.response.body;
   }
 }

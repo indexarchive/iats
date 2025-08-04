@@ -54,6 +54,38 @@ export interface MetadataAPIReview {
   reviewer_itemname: string;
 }
 
+export interface MetadataAPIItemMetadata {
+  identifier: string;
+  "external-identifier"?: string;
+  mediatype: string;
+  country?: string[];
+  date?: string;
+  description: string;
+  director?: string;
+  publisher?: string;
+  actor?: string[];
+  creator?: string | string[];
+  distributor?: string[];
+  format?: string;
+  genre?: string[];
+  language: string;
+  "music-by"?: string;
+  /** if string, semicolon-separated */
+  subject: string | string[];
+  title: string;
+  "written-by"?: string[];
+  year?: string;
+  /** Usually an e-mail address(?) */
+  uploader: string;
+  publicdate: string;
+  addeddate: string;
+  curation: string;
+  sound: string;
+  color: string;
+  collection: string[];
+  rights: string;
+}
+
 export interface MetadataAPIItem {
   alternate_locations: {
     servers: { server: string; dir: string }[];
@@ -73,37 +105,7 @@ export interface MetadataAPIItem {
   item_last_updated: number;
   /** Bytes */
   item_size: number;
-  metadata: {
-    identifier: string;
-    "external-identifier"?: string;
-    mediatype: string;
-    country?: string[];
-    date?: string;
-    description: string;
-    director?: string;
-    publisher?: string;
-    actor?: string[];
-    creator?: string | string[];
-    distributor?: string[];
-    format?: string;
-    genre?: string[];
-    language: string;
-    "music-by"?: string;
-    /** if string, semicolon-separated */
-    subject: string | string[];
-    title: string;
-    "written-by"?: string[];
-    year?: string;
-    /** Usually an e-mail address(?) */
-    uploader: string;
-    publicdate: string;
-    addeddate: string;
-    curation: string;
-    sound: string;
-    color: string;
-    collection: string[];
-    rights: string;
-  };
+  metadata: MetadataAPIItemMetadata;
   reviews?: MetadataAPIReview[];
   server: string;
   /** A unique(?) pseudo-random ID for the item */
