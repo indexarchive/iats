@@ -68,13 +68,15 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       // possible errors, but we should
       // biome-ignore lint/suspicious/noExplicitAny: ^
       data) {
-        var _a;
+        var _a, _b, _c;
         var _this = _super.call(this) || this;
         _this.method = method;
         _this.data = data;
         _this.status = response.status;
         _this.url = response.url;
-        _this.message = typeof data.value === "string" ? data.value : typeof data.error === "string" ? data.error : (_a = data.message) !== null && _a !== void 0 ? _a : "";
+        _this.message = typeof data.value === "string" ? data.value : typeof data.error === "string" ? data.error :
+        // services/search/beta
+        typeof ((_b = (_a = data.response) === null || _a === void 0 ? void 0 : _a.error) === null || _b === void 0 ? void 0 : _b.message) === "string" ? data.response.error.message : (_c = data.message) !== null && _c !== void 0 ? _c : "";
         return _this;
       }
       return ArchiveError;
@@ -470,7 +472,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   body: new URLSearchParams({
                     email: email,
                     password: password
-                  }),
+                  }).toString(),
                   headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                   }
@@ -729,7 +731,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 url = "".concat(this.WRITE_API_BASE, "/").concat(identifier);
                 return [4 /*yield*/, fetch(url, {
                   method: "POST",
-                  body: body,
+                  body: body.toString(),
                   headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                   }
@@ -2234,6 +2236,55 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       ServicesAPI.prototype.getItemImageUrl = function (identifier) {
         return "".concat(this.READ_API_BASE, "/img/").concat(identifier);
       };
+      /**
+       * Use the beta search service endpoint. The `SearchAPI` interface should be
+       * preferred, both because of its developer-friendliness and because it is
+       * properly documented.
+       *
+       * This endpoint does not return exclusively items. Hits are discriminated
+       * by `hit_type`.
+       * @param options options for the request.
+       * - `query`: a query to include in the search, by default, for e.g.
+       *   collections, all items in the collection will be returned.
+       * - `pageType`: the type of page to search (like `collection_details`)
+       * - `pageTarget`: the target of the specified page type (e.g. the
+       *   collection identifier).
+       * - `hits`: the number of hits to return in the response (default 100)
+       * - `page`: page number (1-indexed) (default 1)
+       * - `aggregations`: unknown
+       * - `uid`: unknown
+       * - `clientUrl`: the qualified URL that this request may have originated
+       *   from
+       * - `auth`: authentication data
+       * @returns an object containing `hits` (search results) and some other
+       * useful data
+       */
+      ServicesAPI.prototype.betaSearch = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+          var _a, query, page_type, page_target, _b, hits, _c, page, _d, aggregations, uid, clientUrl, _e, auth, params, url, data;
+          return __generator(this, function (_f) {
+            switch (_f.label) {
+              case 0:
+                _a = options.query, query = _a === void 0 ? "" : _a, page_type = options.pageType, page_target = options.pageTarget, _b = options.hits, hits = _b === void 0 ? 100 : _b, _c = options.page, page = _c === void 0 ? 1 : _c, _d = options.aggregations, aggregations = _d === void 0 ? false : _d, uid = options.uid, clientUrl = options.clientUrl, _e = options.auth, auth = _e === void 0 ? (0, http.newEmptyAuth)() : _e;
+                params = new URLSearchParams({
+                  user_query: query,
+                  page_type: page_type,
+                  page_target: page_target,
+                  hits_per_page: String(hits),
+                  page: String(page),
+                  aggregations: String(aggregations)
+                });
+                if (uid) params.set("uid", uid);
+                if (clientUrl) params.set("client_url", clientUrl);
+                url = "".concat(this.READ_API_BASE, "/search/beta/page_production/?").concat(params);
+                return [4 /*yield*/, (0, http.fetchJson)(url, (0, http.authToHeaderCookies)(auth))];
+              case 1:
+                data = _f.sent();
+                return [2 /*return*/, data.response.body];
+            }
+          });
+        });
+      };
       return ServicesAPI;
     }();
     exports.ServicesAPI = ServicesAPI;
@@ -2256,8 +2307,22 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     Object.defineProperty(exports, "__esModule", {
       value: true
     });
+    exports.ServicesAPISearchBackend = exports.ServicesAPISearchHitType = void 0;
+    var ServicesAPISearchHitType;
+    (function (ServicesAPISearchHitType) {
+      ServicesAPISearchHitType["Item"] = "item";
+      // `ou` alias?
+      ServicesAPISearchHitType["FavoritedSearch"] = "favorited_search";
+    })(ServicesAPISearchHitType || (exports.ServicesAPISearchHitType = ServicesAPISearchHitType = {}));
+    var ServicesAPISearchBackend;
+    (function (ServicesAPISearchBackend) {
+      ServicesAPISearchBackend["Metadata"] = "metadata";
+      ServicesAPISearchBackend["Lists"] = "lists_api";
+    })(ServicesAPISearchBackend || (exports.ServicesAPISearchBackend = ServicesAPISearchBackend = {}));
   });
   unwrapExports(services$1);
+  var services_1$1 = services$1.ServicesAPISearchBackend;
+  var services_2 = services$1.ServicesAPISearchHitType;
   var types = createCommonjsModule(function (module, exports) {
     var __createBinding = commonjsGlobal && commonjsGlobal.__createBinding || (Object.create ? function (o, m, k, k2) {
       if (k2 === undefined) k2 = k;
@@ -2643,7 +2708,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 return [4 /*yield*/, fetch(this.SAVE_API_BASE, {
                   credentials: "omit",
                   method: "POST",
-                  body: params,
+                  body: params.toString(),
                   headers: __assign({
                     Accept: "application/json",
                     "Content-Type": "application/x-www-form-urlencoded"
