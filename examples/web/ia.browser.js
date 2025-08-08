@@ -2244,6 +2244,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
        * This endpoint does not return exclusively items. Hits are discriminated
        * by `hit_type`.
        * @param options options for the request.
+       * - `backend`: restrict results to a specific service backend.
        * - `query`: a query to include in the search, by default, for e.g.
        *   collections, all items in the collection will be returned.
        * - `pageType`: the type of page to search (like `collection_details`)
@@ -2261,11 +2262,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
        */
       ServicesAPI.prototype.betaSearch = function (options) {
         return __awaiter(this, void 0, void 0, function () {
-          var _a, query, page_type, page_target, _b, hits, _c, page, _d, aggregations, uid, clientUrl, _e, auth, params, url, data;
+          var backend, _a, query, page_type, page_target, _b, hits, _c, page, _d, aggregations, uid, clientUrl, _e, auth, params, url, data;
           return __generator(this, function (_f) {
             switch (_f.label) {
               case 0:
-                _a = options.query, query = _a === void 0 ? "" : _a, page_type = options.pageType, page_target = options.pageTarget, _b = options.hits, hits = _b === void 0 ? 100 : _b, _c = options.page, page = _c === void 0 ? 1 : _c, _d = options.aggregations, aggregations = _d === void 0 ? false : _d, uid = options.uid, clientUrl = options.clientUrl, _e = options.auth, auth = _e === void 0 ? (0, http.newEmptyAuth)() : _e;
+                backend = options.backend, _a = options.query, query = _a === void 0 ? "" : _a, page_type = options.pageType, page_target = options.pageTarget, _b = options.hits, hits = _b === void 0 ? 100 : _b, _c = options.page, page = _c === void 0 ? 1 : _c, _d = options.aggregations, aggregations = _d === void 0 ? false : _d, uid = options.uid, clientUrl = options.clientUrl, _e = options.auth, auth = _e === void 0 ? (0, http.newEmptyAuth)() : _e;
                 params = new URLSearchParams({
                   user_query: query,
                   page_type: page_type,
@@ -2274,6 +2275,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   page: String(page),
                   aggregations: String(aggregations)
                 });
+                if (backend) params.set("service_backend", backend);
                 if (uid) params.set("uid", uid);
                 if (clientUrl) params.set("client_url", clientUrl);
                 url = "".concat(this.READ_API_BASE, "/search/beta/page_production/?").concat(params);
@@ -2313,12 +2315,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       ServicesAPISearchHitType["Item"] = "item";
       ServicesAPISearchHitType["FavoritedSearch"] = "favorited_search";
       ServicesAPISearchHitType["Text"] = "text";
+      ServicesAPISearchHitType["AutomaticSpeechRecognition"] = "asr_text";
     })(ServicesAPISearchHitType || (exports.ServicesAPISearchHitType = ServicesAPISearchHitType = {}));
     var ServicesAPISearchBackend;
     (function (ServicesAPISearchBackend) {
       ServicesAPISearchBackend["Metadata"] = "metadata";
       ServicesAPISearchBackend["Lists"] = "lists_api";
       ServicesAPISearchBackend["FullTextSearch"] = "fts";
+      ServicesAPISearchBackend["RadioTranscripts"] = "rcs";
     })(ServicesAPISearchBackend || (exports.ServicesAPISearchBackend = ServicesAPISearchBackend = {}));
   });
   unwrapExports(services$1);

@@ -52,12 +52,14 @@ export enum ServicesAPISearchHitType {
   Item = "item",
   FavoritedSearch = "favorited_search",
   Text = "text",
+  AutomaticSpeechRecognition = "asr_text",
 }
 
 export enum ServicesAPISearchBackend {
   Metadata = "metadata",
   Lists = "lists_api",
   FullTextSearch = "fts",
+  RadioTranscripts = "rcs",
 }
 
 export interface ServicesAPISearchHitBase {
@@ -164,63 +166,14 @@ export interface ServicesAPISearchHitFavoritedSearch
   };
 }
 
-export interface ServicesAPISearchHitText extends ServicesAPISearchHitBase {
-  service_backend: ServicesAPISearchBackend.FullTextSearch;
-  hit_type: ServicesAPISearchHitType.Text;
-  fields: {
-    identifier: string;
-    /** The file that was searched */
-    filename: string;
-    file_basename: string;
-    page_num?: number;
-    file_creation_mtime: number;
-    updated_on: string;
-    created_on: string;
-    mediatype: string;
-    title?: string;
-    creator?: string | string[];
-    date?: string;
-    publicdate?: string;
-    /**
-     * total views over ITEM (not text) lifetime, updated by
-     * audit consultation with Views API
-     */
-    downloads?: number;
-    reviewdate?: string;
-    collection: string | string[];
-    /** Max length 1000 */
-    subject?: string | string[];
-    /** computed from date */
-    year?: number;
-    avg_rating?: number;
-    /** may be stale in FTS */
-    addeddate?: string;
-    /** format varies */
-    issue?: string;
-    /** format varies */
-    source?: string;
-    /**
-     * legacy production overwrites metadata value with highlighted snippet.
-     * max length 1000.
-     */
-    description?: string | string[];
-    /** computed in processing of FTS API hit */
-    result_in_subfile: boolean;
-    /**
-     * Relative path with `q=` appended for text search on the details page.
-     * Synthesized in processing of FTS API hit.
-     */
-    __href__: string;
-    /** may be stale; sourced from MDS and appended to hits */
-    lending__status?: string;
-  };
+interface HighlightableHitBase {
   highlight: {
     /**
-     * Array of excerpts from the text. May include `\n` newlines. Highlights
-     * are denoted by triple curly brackets. For example, if you searched "THE
-     * MAN WHO SHOT LIBERTY VALANCE", you may receive a line like: `Johnson,
-     * Dorothy M. {{{MAN WHO}}} {{{SHOT LIBERTY}}} VALANCE. Jones (Dallas)
-     * Productions, Inc`
+     * Array of excerpts from the text or transcript. May include `\n` newlines.
+     * Highlights are denoted by triple curly brackets. For example, if you
+     * searched "THE MAN WHO SHOT LIBERTY VALANCE", you may receive a line like:
+     * `Johnson, Dorothy M. {{{MAN WHO}}} {{{SHOT LIBERTY}}} VALANCE. Jones
+     * (Dallas) Productions, Inc`
      */
     text: string[];
   };
@@ -231,6 +184,106 @@ export interface ServicesAPISearchHitText extends ServicesAPISearchHitBase {
    */
   _score: number;
 }
+
+export type ServicesAPISearchHitText = ServicesAPISearchHitBase &
+  HighlightableHitBase & {
+    service_backend: ServicesAPISearchBackend.FullTextSearch;
+    hit_type: ServicesAPISearchHitType.Text;
+    fields: {
+      identifier: string;
+      /** The file that was searched */
+      filename: string;
+      file_basename: string;
+      page_num?: number;
+      file_creation_mtime: number;
+      updated_on: string;
+      created_on: string;
+      mediatype: string;
+      title?: string;
+      creator?: string | string[];
+      date?: string;
+      publicdate?: string;
+      /**
+       * total views over ITEM (not text) lifetime, updated by
+       * audit consultation with Views API
+       */
+      downloads?: number;
+      reviewdate?: string;
+      collection: string | string[];
+      /** Max length 1000 */
+      subject?: string | string[];
+      /** computed from date */
+      year?: number;
+      avg_rating?: number;
+      /** may be stale in FTS */
+      addeddate?: string;
+      /** format varies */
+      issue?: string;
+      /** format varies */
+      source?: string;
+      /**
+       * legacy production overwrites metadata value with highlighted snippet.
+       * max length 1000.
+       */
+      description?: string | string[];
+      /** computed in processing of FTS API hit */
+      result_in_subfile: boolean;
+      /**
+       * Relative path with `q=` appended for text search on the details page.
+       * Synthesized in processing of FTS API hit.
+       */
+      __href__: string;
+      /** may be stale; sourced from MDS and appended to hits */
+      lending__status?: string;
+    };
+  };
+
+export type ServicesAPISearchHitRadioTranscript = ServicesAPISearchHitBase &
+  HighlightableHitBase & {
+    service_backend: ServicesAPISearchBackend.RadioTranscripts;
+    hit_type: ServicesAPISearchHitType.AutomaticSpeechRecognition;
+    fields: Pick<
+      ServicesAPISearchHitMetadata["fields"],
+      | "identifier"
+      | "noindex"
+      | "title"
+      | "description"
+      | "subject"
+      | "creator"
+      | "collection"
+      | "date"
+      | "year"
+      | "genre"
+      | "volume"
+      | "type"
+      | "mediatype"
+      | "licenseurl"
+      | "num_favorites"
+      | "num_reviews"
+      | "item_size"
+      | "files_count"
+      | "item_count"
+      | "displayed_item_count"
+      | "collection_files_count"
+      | "collection_size"
+      | "downloads"
+      | "week"
+      | "month"
+      | "indexflag"
+      | "avg_rating"
+      | "addeddate"
+      | "issue"
+      | "source"
+    > & {
+      language?: string | string[];
+      /**
+       * Relative path to the details page with `start` (timestamp in
+       * seconds), `q` (your query), and `scope` (unknown) params appended.
+       * Synthesized in annotation of raw hits.
+       */
+      __href__?: string;
+    };
+  };
 
 export type ServicesAPICollectionExtraInfo = Pick<
   ServicesAPISearchHitMetadata["fields"],
@@ -275,7 +328,8 @@ export type ServicesAPICollectionExtraInfo = Pick<
 export type ServicesAPISearchHit =
   | ServicesAPISearchHitMetadata
   | ServicesAPISearchHitFavoritedSearch
-  | ServicesAPISearchHitText;
+  | ServicesAPISearchHitText
+  | ServicesAPISearchHitRadioTranscript;
 
 export interface ServicesAPIBetaSearchBody {
   hits: {
