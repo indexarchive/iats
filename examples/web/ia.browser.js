@@ -2311,13 +2311,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     var ServicesAPISearchHitType;
     (function (ServicesAPISearchHitType) {
       ServicesAPISearchHitType["Item"] = "item";
-      // `ou` alias?
       ServicesAPISearchHitType["FavoritedSearch"] = "favorited_search";
+      ServicesAPISearchHitType["Text"] = "text";
     })(ServicesAPISearchHitType || (exports.ServicesAPISearchHitType = ServicesAPISearchHitType = {}));
     var ServicesAPISearchBackend;
     (function (ServicesAPISearchBackend) {
       ServicesAPISearchBackend["Metadata"] = "metadata";
       ServicesAPISearchBackend["Lists"] = "lists_api";
+      ServicesAPISearchBackend["FullTextSearch"] = "fts";
     })(ServicesAPISearchBackend || (exports.ServicesAPISearchBackend = ServicesAPISearchBackend = {}));
   });
   unwrapExports(services$1);

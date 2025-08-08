@@ -10,6 +10,7 @@ import type {
   ServicesAPIBetaSearchBody,
   ServicesAPIGetBetaSearch,
   ServicesAPIGetUserListResponse,
+  ServicesAPISearchBackend,
   ServicesAPIUserList,
   ServicesAPIUserListItem,
   ServicesAPIUserListWithItem,
@@ -183,6 +184,7 @@ export class ServicesAPI {
    * This endpoint does not return exclusively items. Hits are discriminated
    * by `hit_type`.
    * @param options options for the request.
+   * - `backend`: restrict results to a specific service backend.
    * - `query`: a query to include in the search, by default, for e.g.
    *   collections, all items in the collection will be returned.
    * - `pageType`: the type of page to search (like `collection_details`)
@@ -199,6 +201,7 @@ export class ServicesAPI {
    * useful data
    */
   async betaSearch(options: {
+    backend?: ServicesAPISearchBackend;
     query?: string;
     pageType: string;
     pageTarget: string;
@@ -210,6 +213,7 @@ export class ServicesAPI {
     auth?: AuthData;
   }): Promise<ServicesAPIBetaSearchBody> {
     const {
+      backend,
       query = "",
       pageType: page_type,
       pageTarget: page_target,
@@ -229,6 +233,7 @@ export class ServicesAPI {
       page: String(page),
       aggregations: String(aggregations),
     });
+    if (backend) params.set("service_backend", backend);
     if (uid) params.set("uid", uid);
     if (clientUrl) params.set("client_url", clientUrl);
 

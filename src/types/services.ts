@@ -50,13 +50,14 @@ export type ServicesAPIGetUserListResponse =
 
 export enum ServicesAPISearchHitType {
   Item = "item",
-  // `ou` alias?
   FavoritedSearch = "favorited_search",
+  Text = "text",
 }
 
 export enum ServicesAPISearchBackend {
   Metadata = "metadata",
   Lists = "lists_api",
+  FullTextSearch = "fts",
 }
 
 export interface ServicesAPISearchHitBase {
@@ -163,6 +164,74 @@ export interface ServicesAPISearchHitFavoritedSearch
   };
 }
 
+export interface ServicesAPISearchHitText extends ServicesAPISearchHitBase {
+  service_backend: ServicesAPISearchBackend.FullTextSearch;
+  hit_type: ServicesAPISearchHitType.Text;
+  fields: {
+    identifier: string;
+    /** The file that was searched */
+    filename: string;
+    file_basename: string;
+    page_num?: number;
+    file_creation_mtime: number;
+    updated_on: string;
+    created_on: string;
+    mediatype: string;
+    title?: string;
+    creator?: string | string[];
+    date?: string;
+    publicdate?: string;
+    /**
+     * total views over ITEM (not text) lifetime, updated by
+     * audit consultation with Views API
+     */
+    downloads?: number;
+    reviewdate?: string;
+    collection: string | string[];
+    /** Max length 1000 */
+    subject?: string | string[];
+    /** computed from date */
+    year?: number;
+    avg_rating?: number;
+    /** may be stale in FTS */
+    addeddate?: string;
+    /** format varies */
+    issue?: string;
+    /** format varies */
+    source?: string;
+    /**
+     * legacy production overwrites metadata value with highlighted snippet.
+     * max length 1000.
+     */
+    description?: string | string[];
+    /** computed in processing of FTS API hit */
+    result_in_subfile: boolean;
+    /**
+     * Relative path with `q=` appended for text search on the details page.
+     * Synthesized in processing of FTS API hit.
+     */
+    __href__: string;
+    /** may be stale; sourced from MDS and appended to hits */
+    lending__status?: string;
+  };
+  highlight: {
+    /**
+     * Array of excerpts from the text. May include `\n` newlines. Highlights
+     * are denoted by triple curly brackets. For example, if you searched "THE
+     * MAN WHO SHOT LIBERTY VALANCE", you may receive a line like: `Johnson,
+     * Dorothy M. {{{MAN WHO}}} {{{SHOT LIBERTY}}} VALANCE. Jones (Dallas)
+     * Productions, Inc`
+     */
+    text: string[];
+  };
+  /**
+   * Score of the result against your query, with 6 decimals of precision.
+   * By default, hits are sorted in descending order by this value (highest
+   * first).
+   */
+  _score: number;
+}
+
 export type ServicesAPICollectionExtraInfo = Pick<
   ServicesAPISearchHitMetadata["fields"],
   | "item_size"
@@ -205,7 +274,8 @@ export type ServicesAPICollectionExtraInfo = Pick<
 
 export type ServicesAPISearchHit =
   | ServicesAPISearchHitMetadata
-  | ServicesAPISearchHitFavoritedSearch;
+  | ServicesAPISearchHitFavoritedSearch
+  | ServicesAPISearchHitText;
 
 export interface ServicesAPIBetaSearchBody {
   hits: {
