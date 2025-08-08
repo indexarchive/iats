@@ -1,69 +1,77 @@
+<!DOCTYPE html>
 <html>
-  <body>
-    <div class="shell">
-      <header>
-        <div class="left">
-          <p>
-            Login to the Internet Archive
-            <span id="next"><a href="03.html">&lt; Previous example</a> | <a href="05.html">Next example &gt;</a>  </span>
-          </p>
-        </div>
-      </header>
-      <main>
-        <section>
-          <form id="form">
-            <p>Type in email and password to login</p>
-            <input type="text" name="username" placeholder="username" value="" />
-            <input type="password" name="password" placeholder="password" value="" />
-            <input type="submit" value="Login"></input>
-          </form>
-          <hr/>
-          <textarea class="language-javascript" id="code"></textarea>
-          <button id="run">Run</button>
-        </section>
-        <section>
-          <div id="out"></div>
-        </section>
-      </main>
-      <footer>
-        <b>iajs</b> examples | <a href="https://github.com/rchrd2/iajs">https://github.com/rchrd2/iajs</a>
-      </footer>
-    </div>
-<!-- --------------------- -->
-<script src="./ia.browser.js"></script>
-<script id="sourcecode">
-var formEl = document.getElementById('form');
-formEl.onsubmit = function(e) {
-  e.preventDefault();
-  ia.Auth.login(
-    formEl.elements.username.value,
-    formEl.elements.password.value
-  ).then(function(auth) {
-    // Uncomment to add a review after logging in
-    // ia.ReviewsAPI.add({
-    //   title: 'hello', body: 'world', stars: 5, identifier: "iajs-example-reviews", auth
-    // }).then(console.log);
 
-    // Uncomment to try metadata patch (it wont' work unless you own the item)
-    // const patch = {
-    //   op: "add",
-    //   path: "/title",
-    //   value: `The date is ${new Date().toISOString()}`,
-    // };
-    // ia.MetadataAPI.patch({ identifier: "iajs-example-reviews", patch, auth }).then(console.log);
+<head>
+  <meta charset="utf-8">
+  <title>Authentication example | indexarchive/iats</title>
+</head>
 
-    // Uncomment to save page to wayback
-    // ia.WaybackAPI.savePageNow({url: "example.com", auth}).then(console.log);
+<body>
+  <div class="shell">
+    <header>
+      <div class="left">
+        <p>
+          Login to the Internet Archive
+          <span id="next"><a href="03.html">&lt; Previous example</a> | <a href="05.html">Next example &gt;</a> </span>
+        </p>
+      </div>
+    </header>
+    <main>
+      <section>
+        <form id="form">
+          <p>Type in email and password to login</p>
+          <input type="text" name="username" placeholder="username" value="" />
+          <input type="password" name="password" placeholder="password" value="" />
+          <input type="submit" value="Login" />
+        </form>
+        <hr />
+        <textarea class="language-javascript" id="code"></textarea>
+        <button id="run">Run</button>
+      </section>
+      <section>
+        <div id="out"></div>
+      </section>
+    </main>
+    <footer>
+      <b>iats</b> examples | <a href="https://github.com/indexarchive/iats">https://github.com/indexarchive/iats</a>
+    </footer>
+  </div>
+  <!-- --------------------- -->
+  <script src="./ia.browser.js"></script>
+  <script id="sourcecode">
+    var formEl = document.getElementById('form');
+    formEl.onsubmit = function (e) {
+      e.preventDefault();
+      ia.Auth.login(
+        formEl.elements.username.value,
+        formEl.elements.password.value
+      ).then(function (auth) {
+        // Uncomment to add a review after logging in
+        // ia.ReviewsAPI.add({
+        //   title: 'hello', body: 'world', stars: 5, identifier: "iajs-example-reviews", auth
+        // }).then(console.log);
 
-    var outEl = document.getElementById('out');
-    outEl.innerHTML = `<pre>${JSON.stringify(auth,null, 2)}</pre>`;
-  })
-};
-</script>
-<script src="./common.js"></script>
-<link rel="stylesheet" href="./water-2-light.css">
-<link rel="stylesheet" href="./common.css">
-<style>
-</style>
-  </body>
+        // Uncomment to try metadata patch (it wont' work unless you own the item)
+        // const patch = {
+        //   op: "add",
+        //   path: "/title",
+        //   value: `The date is ${new Date().toISOString()}`,
+        // };
+        // ia.MetadataAPI.patch({ identifier: "iajs-example-reviews", patch, auth }).then(console.log);
+
+        // Uncomment to save page to wayback
+        // ia.WaybackAPI.savePageNow({url: "example.com", auth}).then(console.log);
+
+        var outEl = document.getElementById('out');
+        outEl.innerHTML = `<pre>${JSON.stringify(auth, null, 2)}</pre>`;
+      })
+    };
+  </script>
+  <script src="./common.js"></script>
+  <link rel="stylesheet" href="./water-2-light.css">
+  <link rel="stylesheet" href="./common.css">
+  <style>
+  </style>
+</body>
+
 </html>
