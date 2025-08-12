@@ -1,3 +1,29 @@
+export enum ItemMediaType {
+  // mostly-regular items
+  /** an item created with a video file */
+  Movie = "movies",
+  /** an item created with a file such as a PDF or EPUB */
+  Text = "texts",
+  /** an item created with an audio file */
+  Audio = "audio",
+  /** an item created with an image file */
+  Image = "image",
+  /** an item created with a file such as an ISO or EXE */
+  Software = "software",
+  /** an item created as part of the live music archive */
+  Concerts = "etree",
+  /** a way to categorize other items */
+  Collection = "collection",
+  /** a user account */
+  Account = "account",
+  /** data for the wayback machine */
+  Web = "web",
+
+  // weird stuff, maybe only applicable to the favorites api
+  Profile = "profile",
+  Search = "search",
+}
+
 export interface SearchAPIItem {
   avg_rating: string;
   backup_location: string;
@@ -18,9 +44,21 @@ export interface SearchAPIItem {
   imagecount: string;
   indexflag: string;
   item_size: string | number;
+  /** for collections */
+  item_count?: number;
+  /** the size of the collection in bytes */
+  collection_size?: number;
+  /** the total number of files in the collection */
+  collection_files_count?: number;
+  /**
+   * the number of files, including metadata files, associated with the item.
+   * for a collection, this is not a sum of the collection's files, instead
+   * see `collection_files_count` or `item_count`.
+   */
+  files_count?: number;
   language: string;
   licenseurl: string;
-  mediatype: string;
+  mediatype: ItemMediaType;
   members: string;
   name?: string;
   noindex: string;

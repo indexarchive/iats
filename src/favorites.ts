@@ -8,10 +8,12 @@ import {
   str2arr,
 } from "./http";
 import { MetadataAPI } from "./metadata";
+import type { FavoritesAPIBookmark } from "./types";
 
 export class FavoritesAPI {
   API_BASE = corsWorkAround("https://archive.org/bookmarks.php");
-  EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
+  // Not sure what this is for
+  // EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
 
   async get({
     screenname = null,
@@ -25,7 +27,19 @@ export class FavoritesAPI {
     }
     if (screenname) {
       const params = { output: "json", screenname };
-      return await fetchJson(`${this.API_BASE}?${paramify(params)}`);
+      try {
+        const data = await fetchJson<FavoritesAPIBookmark[]>(
+          `${this.API_BASE}?${paramify(params)}`,
+        );
+        return data;
+      } catch (e) {
+        if (e instanceof SyntaxError) {
+          // IA returns invalid JSON for users with no
+          // bookmarks (a single end square bracket)
+          return [];
+        }
+        throw e;
+      }
     }
     throw new Error("Neither screenname or auth provided for bookmarks lookup");
   }

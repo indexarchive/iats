@@ -880,11 +880,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     var FavoritesAPI = /** @class */function () {
       function FavoritesAPI() {
         this.API_BASE = (0, cors.corsWorkAround)("https://archive.org/bookmarks.php");
-        this.EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
       }
+      // Not sure what this is for
+      // EXPLORE_API_BASE = "https://archive.org/bookmarks-explore.php";
       FavoritesAPI.prototype.get = function (_a) {
         return __awaiter(this, arguments, void 0, function (_b) {
-          var params;
+          var params, data, e_1;
           var _c = _b.screenname,
             screenname = _c === void 0 ? null : _c,
             _d = _b.auth,
@@ -895,15 +896,27 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 if (!screenname && auth.values.screenname) {
                   screenname = auth.values.screenname;
                 }
-                if (!screenname) return [3 /*break*/, 2];
+                if (!screenname) return [3 /*break*/, 4];
                 params = {
                   output: "json",
                   screenname: screenname
                 };
-                return [4 /*yield*/, (0, http.fetchJson)("".concat(this.API_BASE, "?").concat((0, http.paramify)(params)))];
+                _e.label = 1;
               case 1:
-                return [2 /*return*/, _e.sent()];
+                _e.trys.push([1, 3,, 4]);
+                return [4 /*yield*/, (0, http.fetchJson)("".concat(this.API_BASE, "?").concat((0, http.paramify)(params)))];
               case 2:
+                data = _e.sent();
+                return [2 /*return*/, data];
+              case 3:
+                e_1 = _e.sent();
+                if (e_1 instanceof SyntaxError) {
+                  // IA returns invalid JSON for users with no
+                  // bookmarks (a single end square bracket)
+                  return [2 /*return*/, []];
+                }
+                throw e_1;
+              case 4:
                 throw new Error("Neither screenname or auth provided for bookmarks lookup");
             }
           });
@@ -2293,6 +2306,18 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
   });
   unwrapExports(services);
   var services_1 = services.ServicesAPI;
+  var favorites$1 = createCommonjsModule(function (module, exports) {
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.FavoritesAPIKind = void 0;
+    var FavoritesAPIKind;
+    (function (FavoritesAPIKind) {
+      FavoritesAPIKind["Favorite"] = "favorite";
+    })(FavoritesAPIKind || (exports.FavoritesAPIKind = FavoritesAPIKind = {}));
+  });
+  unwrapExports(favorites$1);
+  var favorites_1$1 = favorites$1.FavoritesAPIKind;
   var metadata$1 = createCommonjsModule(function (module, exports) {
     Object.defineProperty(exports, "__esModule", {
       value: true
@@ -2303,8 +2328,35 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     Object.defineProperty(exports, "__esModule", {
       value: true
     });
+    exports.ItemMediaType = void 0;
+    var ItemMediaType;
+    (function (ItemMediaType) {
+      // mostly-regular items
+      /** an item created with a video file */
+      ItemMediaType["Movie"] = "movies";
+      /** an item created with a file such as a PDF or EPUB */
+      ItemMediaType["Text"] = "texts";
+      /** an item created with an audio file */
+      ItemMediaType["Audio"] = "audio";
+      /** an item created with an image file */
+      ItemMediaType["Image"] = "image";
+      /** an item created with a file such as an ISO or EXE */
+      ItemMediaType["Software"] = "software";
+      /** an item created as part of the live music archive */
+      ItemMediaType["Concerts"] = "etree";
+      /** a way to categorize other items */
+      ItemMediaType["Collection"] = "collection";
+      /** a user account */
+      ItemMediaType["Account"] = "account";
+      /** data for the wayback machine */
+      ItemMediaType["Web"] = "web";
+      // weird stuff, maybe only applicable to the favorites api
+      ItemMediaType["Profile"] = "profile";
+      ItemMediaType["Search"] = "search";
+    })(ItemMediaType || (exports.ItemMediaType = ItemMediaType = {}));
   });
   unwrapExports(search$1);
+  var search_1$1 = search$1.ItemMediaType;
   var services$1 = createCommonjsModule(function (module, exports) {
     Object.defineProperty(exports, "__esModule", {
       value: true
@@ -2351,6 +2403,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     Object.defineProperty(exports, "__esModule", {
       value: true
     });
+    __exportStar(favorites$1, exports);
     __exportStar(metadata$1, exports);
     __exportStar(search$1, exports);
     __exportStar(services$1, exports);
