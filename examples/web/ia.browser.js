@@ -2249,37 +2249,13 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       ServicesAPI.prototype.getItemImageUrl = function (identifier) {
         return "".concat(this.READ_API_BASE, "/img/").concat(identifier);
       };
-      /**
-       * Use the beta search service endpoint. The `SearchAPI` interface should be
-       * preferred, both because of its developer-friendliness and because it is
-       * properly documented.
-       *
-       * This endpoint does not return exclusively items. Hits are discriminated
-       * by `hit_type`.
-       * @param options options for the request.
-       * - `backend`: restrict results to a specific service backend.
-       * - `query`: a query to include in the search, by default, for e.g.
-       *   collections, all items in the collection will be returned.
-       * - `pageType`: the type of page to search (like `collection_details`)
-       * - `pageTarget`: the target of the specified page type (e.g. the
-       *   collection identifier).
-       * - `hits`: the number of hits to return in the response (default 100)
-       * - `page`: page number (1-indexed) (default 1)
-       * - `aggregations`: unknown
-       * - `uid`: unknown
-       * - `clientUrl`: the qualified URL that this request may have originated
-       *   from
-       * - `auth`: authentication data
-       * @returns an object containing `hits` (search results) and some other
-       * useful data
-       */
       ServicesAPI.prototype.betaSearch = function (options) {
         return __awaiter(this, void 0, void 0, function () {
-          var backend, _a, query, page_type, page_target, _b, hits, _c, page, _d, aggregations, uid, clientUrl, _e, auth, params, url, data;
+          var backend, _a, query, page_type, page_target, _b, hits, _c, page, _d, aggregations, sort, uid, clientUrl, _e, auth, params, url, data;
           return __generator(this, function (_f) {
             switch (_f.label) {
               case 0:
-                backend = options.backend, _a = options.query, query = _a === void 0 ? "" : _a, page_type = options.pageType, page_target = options.pageTarget, _b = options.hits, hits = _b === void 0 ? 100 : _b, _c = options.page, page = _c === void 0 ? 1 : _c, _d = options.aggregations, aggregations = _d === void 0 ? false : _d, uid = options.uid, clientUrl = options.clientUrl, _e = options.auth, auth = _e === void 0 ? (0, http.newEmptyAuth)() : _e;
+                backend = options.backend, _a = options.query, query = _a === void 0 ? "" : _a, page_type = options.pageType, page_target = options.pageTarget, _b = options.hits, hits = _b === void 0 ? 100 : _b, _c = options.page, page = _c === void 0 ? 1 : _c, _d = options.aggregations, aggregations = _d === void 0 ? false : _d, sort = options.sort, uid = options.uid, clientUrl = options.clientUrl, _e = options.auth, auth = _e === void 0 ? (0, http.newEmptyAuth)() : _e;
                 params = new URLSearchParams({
                   user_query: query,
                   page_type: page_type,
@@ -2288,7 +2264,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   page: String(page),
                   aggregations: String(aggregations)
                 });
+                if ("pageElements" in options) {
+                  params.set("page_elements", JSON.stringify(options.pageElements));
+                }
                 if (backend) params.set("service_backend", backend);
+                if (sort) params.set("sort", sort);
                 if (uid) params.set("uid", uid);
                 if (clientUrl) params.set("client_url", clientUrl);
                 url = "".concat(this.READ_API_BASE, "/search/beta/page_production/?").concat(params);
@@ -2361,7 +2341,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
     Object.defineProperty(exports, "__esModule", {
       value: true
     });
-    exports.ServicesAPISearchBackend = exports.ServicesAPISearchHitType = void 0;
+    exports.ServicesAPIBetaSearchPageType = exports.ServicesAPISearchBackend = exports.ServicesAPISearchHitType = void 0;
     var ServicesAPISearchHitType;
     (function (ServicesAPISearchHitType) {
       ServicesAPISearchHitType["Item"] = "item";
@@ -2376,10 +2356,16 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       ServicesAPISearchBackend["FullTextSearch"] = "fts";
       ServicesAPISearchBackend["RadioTranscripts"] = "rcs";
     })(ServicesAPISearchBackend || (exports.ServicesAPISearchBackend = ServicesAPISearchBackend = {}));
+    var ServicesAPIBetaSearchPageType;
+    (function (ServicesAPIBetaSearchPageType) {
+      ServicesAPIBetaSearchPageType["Collection"] = "collection_details";
+      ServicesAPIBetaSearchPageType["Account"] = "account_details";
+    })(ServicesAPIBetaSearchPageType || (exports.ServicesAPIBetaSearchPageType = ServicesAPIBetaSearchPageType = {}));
   });
   unwrapExports(services$1);
-  var services_1$1 = services$1.ServicesAPISearchBackend;
-  var services_2 = services$1.ServicesAPISearchHitType;
+  var services_1$1 = services$1.ServicesAPIBetaSearchPageType;
+  var services_2 = services$1.ServicesAPISearchBackend;
+  var services_3 = services$1.ServicesAPISearchHitType;
   var types = createCommonjsModule(function (module, exports) {
     var __createBinding = commonjsGlobal && commonjsGlobal.__createBinding || (Object.create ? function (o, m, k, k2) {
       if (k2 === undefined) k2 = k;

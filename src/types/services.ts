@@ -1,4 +1,4 @@
-import type { MetadataAPIItemMetadata } from "./metadata";
+import type { MetadataAPIItemMetadata, MetadataAPIReview } from "./metadata";
 
 export interface ServicesAPIUserListItem {
   identifier: string;
@@ -150,6 +150,7 @@ export interface ServicesAPISearchHitMetadata extends ServicesAPISearchHitBase {
   };
   highlight: null;
   _score: null;
+  review?: MetadataAPIReview;
 }
 
 export interface ServicesAPISearchHitFavoritedSearch
@@ -325,24 +326,105 @@ export type ServicesAPICollectionExtraInfo = Pick<
   reviews_metadata: unknown[];
 };
 
+export interface ServicesAPIAccountExtraInfo {
+  account_details: {
+    screenname: string;
+    user_item_identifier: string;
+    /** date without time */
+    user_since: string;
+  };
+  is_archivist: boolean;
+  user_item_metadata: {
+    title: string;
+    description: string;
+  };
+  policy_settings: {
+    is_archive_user: boolean;
+    /** human-readable list of abilities the user has across the Archive */
+    privileges: string[];
+    /** human-readable list of preferences */
+    preferences: string[];
+  };
+}
+
 export type ServicesAPISearchHit =
   | ServicesAPISearchHitMetadata
   | ServicesAPISearchHitFavoritedSearch
   | ServicesAPISearchHitText
   | ServicesAPISearchHitRadioTranscript;
 
-export interface ServicesAPIBetaSearchBody {
+interface ServicesAPIBetaSearchBodyBase<T> {
   hits: {
     total: number;
     returned: number;
-    hits: ServicesAPISearchHit[];
+    hits: T[];
   };
-  /** If searching a collection */
-  collection_extra_info?: ServicesAPICollectionExtraInfo;
   collection_titles: Record<string, string>;
 }
 
-export interface ServicesAPIGetBetaSearch {
+export interface ServicesAPIBetaSearchCollectionBody
+  extends ServicesAPIBetaSearchBodyBase<ServicesAPISearchHit> {
+  /** If searching a collection */
+  collection_extra_info?: ServicesAPICollectionExtraInfo;
+}
+
+export interface ServicesAPIBetaSearchAccountBodyElements {
+  lending: {
+    loans: [];
+    waitlist: [];
+    loan_history: [];
+  };
+  web_archives: {
+    url: string;
+    captures: string[];
+  }[];
+  uploads: Pick<
+    ServicesAPIBetaSearchBodyBase<ServicesAPISearchHitMetadata>,
+    "hits"
+  > & { aggregations: unknown[] };
+  collections: Pick<
+    ServicesAPIBetaSearchBodyBase<ServicesAPISearchHitMetadata>,
+    "hits"
+  > & { aggregations: unknown[] };
+  reviews: Pick<
+    ServicesAPIBetaSearchBodyBase<ServicesAPISearchHitMetadata>,
+    "hits"
+  > & { aggregations: unknown[] };
+}
+
+export type ServicesAPIAccountPageElement =
+  | "lending"
+  | "web_archives"
+  | "uploads"
+  | "collections"
+  | "reviews";
+
+export interface ServicesAPIBetaSearchAccountBody<
+  E extends ServicesAPIAccountPageElement[] = [
+    "lending",
+    "web_archives",
+    "uploads",
+    "collections",
+    "reviews",
+  ],
+> {
+  page_elements: Pick<ServicesAPIBetaSearchAccountBodyElements, E[number]>;
+  collection_titles: Record<string, string>;
+  account_extra_info: ServicesAPIAccountExtraInfo;
+}
+
+export type ServicesAPIBetaSearchBody =
+  | ServicesAPIBetaSearchCollectionBody
+  | ServicesAPIBetaSearchAccountBody;
+
+export enum ServicesAPIBetaSearchPageType {
+  Collection = "collection_details",
+  Account = "account_details",
+}
+
+export interface ServicesAPIGetBetaSearch<
+  Body extends ServicesAPIBetaSearchBody,
+> {
   uid?: string;
   version: string;
   session_context: unknown;
@@ -351,7 +433,7 @@ export interface ServicesAPIGetBetaSearch {
   elapsed_secs: number;
   response: {
     header: unknown;
-    body: ServicesAPIBetaSearchBody;
+    body: Body;
     hit_schema: Record<ServicesAPISearchHitType, unknown> | [];
   };
 }

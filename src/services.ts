@@ -7,7 +7,11 @@ import {
   newEmptyAuth,
 } from "./http";
 import type {
+  ServicesAPIBetaSearchPageType,
+  ServicesAPIAccountPageElement,
+  ServicesAPIBetaSearchAccountBody,
   ServicesAPIBetaSearchBody,
+  ServicesAPIBetaSearchCollectionBody,
   ServicesAPIGetBetaSearch,
   ServicesAPIGetUserListResponse,
   ServicesAPISearchBackend,
@@ -15,6 +19,20 @@ import type {
   ServicesAPIUserListItem,
   ServicesAPIUserListWithItem,
 } from "./types/services";
+
+interface BetaSearchOptions<T extends ServicesAPIBetaSearchPageType> {
+  backend?: ServicesAPISearchBackend;
+  query?: string;
+  pageType: T;
+  pageTarget: string;
+  hits?: number;
+  page?: number;
+  aggregations?: boolean;
+  sort?: string;
+  uid?: string;
+  clientUrl?: string;
+  auth?: AuthData;
+}
 
 export class ServicesAPI {
   READ_API_BASE = "https://archive.org/services";
@@ -190,28 +208,33 @@ export class ServicesAPI {
    * - `pageType`: the type of page to search (like `collection_details`)
    * - `pageTarget`: the target of the specified page type (e.g. the
    *   collection identifier).
+   * - `pageElements`: for applicable page types, the specific elements to
+   *   return in the response body
    * - `hits`: the number of hits to return in the response (default 100)
    * - `page`: page number (1-indexed) (default 1)
    * - `aggregations`: unknown
    * - `uid`: unknown
+   * - `sort`: order hits by field and asc/desc (like `publicdate desc`)
    * - `clientUrl`: the qualified URL that this request may have originated
    *   from
    * - `auth`: authentication data
    * @returns an object containing `hits` (search results) and some other
    * useful data
    */
-  async betaSearch(options: {
-    backend?: ServicesAPISearchBackend;
-    query?: string;
-    pageType: string;
-    pageTarget: string;
-    hits?: number;
-    page?: number;
-    aggregations?: boolean;
-    uid?: string;
-    clientUrl?: string;
-    auth?: AuthData;
-  }): Promise<ServicesAPIBetaSearchBody> {
+  async betaSearch(
+    options: BetaSearchOptions<ServicesAPIBetaSearchPageType.Collection>,
+  ): Promise<ServicesAPIBetaSearchCollectionBody>;
+  async betaSearch<
+    Elements extends
+      ServicesAPIAccountPageElement[] = ServicesAPIAccountPageElement[],
+  >(
+    options: BetaSearchOptions<ServicesAPIBetaSearchPageType.Account> & {
+      pageElements?: Elements;
+    },
+  ): Promise<ServicesAPIBetaSearchAccountBody<Elements>>;
+  async betaSearch(
+    options: BetaSearchOptions<ServicesAPIBetaSearchPageType>,
+  ): Promise<ServicesAPIBetaSearchBody> {
     const {
       backend,
       query = "",
@@ -220,6 +243,7 @@ export class ServicesAPI {
       hits = 100,
       page = 1,
       aggregations = false,
+      sort,
       uid,
       clientUrl,
       auth = newEmptyAuth(),
@@ -233,15 +257,18 @@ export class ServicesAPI {
       page: String(page),
       aggregations: String(aggregations),
     });
+    if ("pageElements" in options) {
+      params.set("page_elements", JSON.stringify(options.pageElements));
+    }
     if (backend) params.set("service_backend", backend);
+    if (sort) params.set("sort", sort);
     if (uid) params.set("uid", uid);
     if (clientUrl) params.set("client_url", clientUrl);
 
     const url = `${this.READ_API_BASE}/search/beta/page_production/?${params}`;
-    const data = await fetchJson<ServicesAPIGetBetaSearch>(
-      url,
-      authToHeaderCookies(auth),
-    );
+    const data = await fetchJson<
+      ServicesAPIGetBetaSearch<ServicesAPIBetaSearchBody>
+    >(url, authToHeaderCookies(auth));
     return data.response.body;
   }
 }
