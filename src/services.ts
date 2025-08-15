@@ -20,14 +20,17 @@ import type {
   ServicesAPIUserListWithItem,
 } from "./types/services";
 
-interface BetaSearchOptions<T extends ServicesAPIBetaSearchPageType> {
+interface BetaSearchOptions<
+  T extends ServicesAPIBetaSearchPageType = undefined,
+> {
   backend?: ServicesAPISearchBackend;
   query?: string;
-  pageType: T;
-  pageTarget: string;
+  pageType?: T;
+  pageTarget?: string;
   hits?: number;
   page?: number;
   aggregations?: boolean;
+  aggregationsSize?: number;
   sort?: string;
   uid?: string;
   clientUrl?: string;
@@ -243,6 +246,7 @@ export class ServicesAPI {
       hits = 100,
       page = 1,
       aggregations = false,
+      aggregationsSize,
       sort,
       uid,
       clientUrl,
@@ -262,6 +266,9 @@ export class ServicesAPI {
     }
     if (backend) params.set("service_backend", backend);
     if (sort) params.set("sort", sort);
+    if (aggregationsSize !== undefined) {
+      params.set("aggregations_size", String(aggregationsSize));
+    }
     if (uid) params.set("uid", uid);
     if (clientUrl) params.set("client_url", clientUrl);
 

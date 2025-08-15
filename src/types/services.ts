@@ -1,4 +1,5 @@
 import type { MetadataAPIItemMetadata, MetadataAPIReview } from "./metadata";
+import type { ItemMediaType } from "./search";
 
 export interface ServicesAPIUserListItem {
   identifier: string;
@@ -199,7 +200,7 @@ export type ServicesAPISearchHitText = ServicesAPISearchHitBase &
       file_creation_mtime: number;
       updated_on: string;
       created_on: string;
-      mediatype: string;
+      mediatype: ItemMediaType;
       title?: string;
       creator?: string | string[];
       date?: string;
@@ -316,7 +317,7 @@ export type ServicesAPICollectionExtraInfo = Pick<
     identifier: string;
     description: string;
     hidden: `${boolean}`;
-    mediatype: string;
+    mediatype: ItemMediaType;
     sort_order: string;
     subject: string | string[];
     title: string;
@@ -353,31 +354,51 @@ export type ServicesAPISearchHit =
   | ServicesAPISearchHitText
   | ServicesAPISearchHitRadioTranscript;
 
-interface ServicesAPIBetaSearchBodyBase<T> {
+export interface ServicesAPIBetaSearchBodyBase<T> {
   hits: {
     total: number;
     returned: number;
     hits: T[];
   };
   collection_titles: Record<string, string>;
+  // I don't really understand this
+  aggregations?: Record<
+    string,
+    {
+      doc_count_error_upper_bound?: number;
+      sum_other_doc_count?: number;
+      buckets:
+        | number[]
+        | { key: string; doc_count: number; doc_count_upper_bound: number }[];
+      redacted_buckets?: {
+        key: string;
+        doc_count: number;
+        doc_count_error_upper_bound: number;
+      }[];
+      first_bucket_key?: number;
+      last_bucket_key?: number;
+      number_buckets?: number;
+      interval?: number;
+    }
+  >;
 }
 
 export interface ServicesAPIBetaSearchCollectionBody
   extends ServicesAPIBetaSearchBodyBase<ServicesAPISearchHit> {
-  /** If searching a collection */
-  collection_extra_info?: ServicesAPICollectionExtraInfo;
+  collection_extra_info: ServicesAPICollectionExtraInfo;
 }
 
 export interface ServicesAPIBetaSearchAccountBodyElements {
   lending: {
-    loans: [];
-    waitlist: [];
-    loan_history: [];
+    loans: unknown[];
+    waitlist: unknown[];
+    loan_history: ServicesAPISearchHitMetadata[];
   };
   web_archives: {
     url: string;
     captures: string[];
   }[];
+  forum_posts: unknown[];
   uploads: Pick<
     ServicesAPIBetaSearchBodyBase<ServicesAPISearchHitMetadata>,
     "hits"
@@ -397,7 +418,8 @@ export type ServicesAPIAccountPageElement =
   | "web_archives"
   | "uploads"
   | "collections"
-  | "reviews";
+  | "reviews"
+  | "forum_posts";
 
 export interface ServicesAPIBetaSearchAccountBody<
   E extends ServicesAPIAccountPageElement[] = [

@@ -1,3 +1,5 @@
+import type { ItemMediaType } from "./search";
+
 export interface MetadataAPIBaseFile {
   name: string;
   source: "original" | "metadata" | "derivative";
@@ -57,7 +59,7 @@ export interface MetadataAPIReview {
 export interface MetadataAPIItemMetadata {
   identifier: string;
   "external-identifier"?: string;
-  mediatype: string;
+  mediatype: ItemMediaType;
   country?: string[];
   date?: string;
   description: string;
